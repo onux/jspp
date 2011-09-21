@@ -1,3 +1,11 @@
 9/20/11
 -------
 * Added classes.  Nested classes, subclasses, access modifiers (private, public, protected), polymorphism, super, constructors, destructors, instance members, static members, overloadable methods, singletons, anonymous classes, classes as first-class citizens
+* Added block scoping
+* Added implicit RegExp.prototype.exec as implemented in SpiderMonkey/v8.  Example: /foo/("foo")
+* Added custom regex delimiters
+* Added regex comments
+* Added regex free spacing mode with "x" flag (ignores whitespace, comments)
+* Added "inside" keyword.  Shortcut for Object.prototype.hasOwnProperty.call(foo, bar)
+* Added logical assignment operators &&= and ||=
+* Added function default parameters
