@@ -1,4 +1,4 @@
-9/20/11
+9/1/11
 -------
 * Added classes.  Nested classes, subclasses, access modifiers (private, public, protected), polymorphism, super, constructors, destructors, instance members, static members, overloadable methods, singletons, anonymous classes, classes as first-class citizens
 * Added block scoping
