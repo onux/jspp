@@ -55,3 +55,10 @@ test/qunit.css - QUnit CSS file
 test/classes.html - Unit tests for classes
 test/scopes.html - Unit tests for scopes
 test/typesys-strict.html - Unit tests for #typesys strict
+
+Credits
+-------
+Brendan Eich - JavaScript & Narcissus
+Guillaume Lathoud - v8/JSC port of Narcissus
+Roger Poon - JavaScript++ Language
+QUnit - QUnit testing framework
