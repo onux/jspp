@@ -3,6 +3,16 @@ JavaScript++ Alpha 0.01
 
 JavaScript++ provides the same familiar C-style language syntax of JavaScript and brings modern language features such as classes; block scoping and constants; pluggable type systems and type safety; packages and modules; comprehensive standard libraries; enhanced regular expressions and PCRE; and more to JavaScript with almost no learning curve through an extended ES3 grammar.
 
+As JavaScript grows and extends its reach beyond the web browser, and larger applications with increasing complexity begin to pop up, the original JavaScript syntax - which was designed for adding small programs and interactivity to web pages - needs to be extended to facilitate development of increasingly complex web applications. With features such as classes, static typing, and a package/module system, JavaScript++ enables large-scale software development that is maintainable, reliable, and economical.
+
+JavaScript++ compiles to ES3-compatible JavaScript and is compatible with IE 5.5 and all versions of Firefox, Chrome, and the vast majority of web browsers dating back to 1999 for the client-side and Node.js, v8, SpiderMonkey, and Rhino on the server-side. Furthermore, JavaScript++ is backwards-compatible with all existing JavaScript code and libraries (jQuery, YUI et al), and JavaScript++ code can seamlessly and easily be embedded into your existing JavaScript code.
+
+The JavaScript++ compiler supports regular JavaScript so there is practically no learning curve. Just pick and choose which JavaScript++ features you want to incorporate and learn on demand.
+
+JavaScript++ incorporates features from Python, Perl, Java/C#, ES4, Harmony, Haskell, and more while incorporating its own unique features. The driving philosophy behind JavaScript++ is productivity, and it will make everything from small scripts to large applications easier and faster to write. Take the mundane out of your JavaScript code and enjoy the good parts of JavaScript with JavaScript++!
+
+-----------------------
+
 This is an early alpha preview version.
 
 Official website: http://jspp.javascript.am/
