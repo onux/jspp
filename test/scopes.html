@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link media="screen" type="text/css" rel="stylesheet" href="qunit.css">
+	<title>JS++ Unit Tests: Scopes</title>
+	<style type="text/css">
+		code { display: none; }
+	</style>
+</head>
+<body>
+
+<h1 id="qunit-header">JavaScript++ Scopes</h1>
+<h2 id="qunit-banner"></h2>
+<div id="qunit-testrunner-toolbar"></div>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+<div id="qunit-fixture">test markup, will be hidden</div>
+
+<!--
+#######################BASIC REQUIREMENTS#######################
+-->
+<code class="eval">
+var myVar = 1;
+
+myVar
+</code>
+<code class="eval">
+(function() {
+	var foo = 1;
+	
+	return foo;
+})();
+</code>
+<code class="eval">
+let foo = 1;
+
+foo
+</code>
+<!--
+#######################BLOCK SCOPE#######################
+-->
+<code>
+{
+	let foo = 1;
+}
+
+foo
+</code>
+<code>
+if (1) {
+	let foo = 1;
+}
+
+foo
+</code>
+<code>
+for (let foo=0;foo<1;foo++);
+
+foo
+</code>
+<code>
+for (let foo in {});
+
+foo
+</code>
+<code>
+for (let foo inside {});
+
+foo
+</code>
+<code>
+while (1) {
+	let foo = 1;
+	break;
+}
+
+foo
+</code>
+<code>
+do {
+	let foo = 1;
+}
+while(0);
+
+foo
+</code>
+<code>
+switch(1) {
+	case 1:
+		let foo = 1;
+		break;
+}
+
+foo
+</code>
+<code>
+switch(2) {
+	case 1:
+		let foo = 1;
+		break;
+	default:
+		let foo = 2;
+		break;
+}
+
+foo
+</code>
+<code class="eval">
+(function() { //Don't pollute the global scope
+	var foo = 1;
+
+	{ let foo = 2; }
+
+	return foo;
+})()
+</code>
+<code class="eval">
+(function() {
+	{
+		let foo = 1;
+		{
+			return foo;
+		}
+	}
+})();
+</code>
+
+<button onclick="Start()">Start</button>
+
+<script type="text/javascript" src="../jsdefs.js"></script>
+<script type="text/javascript" src="../jsparse.js"></script>
+<script type="text/javascript" src="../compiler.js"></script>
+
+<script type="text/javascript" src="qunit.js"></script>
+<script type="text/javascript">
+var codeTags = document.getElementsByTagName("code"), code = [], c;
+
+for (var i=0, len=codeTags.length; i<len; i++) {
+	c = new compiler(window.narcissus.jsparse((codeTags[i].innerText||codeTags[i].textContent)), {nowrap:true});
+	c.preprocess();
+	try {
+		code.push(codeTags[i].className == "eval" ? eval(c.compile()) : c.compile());
+	}catch(e) {
+		code.push("Error");
+	}
+}
+
+while(code.length != codeTags.length); //Stop race conditions
+
+function Start() { //Problems with race conditions with qUnit, so wrap in function
+
+var i = 0;
+
+test("Basic Requirements", function() {
+	equal(code[i++], 1, "Global Scope");
+	equal(code[i++], 1, "Function Scope");
+	equal(code[i++], 1, "Block Scope");
+});
+
+test("Block Scope", function() {
+	raises(Function(code[i++]), ReferenceError, "Block { ... }");
+	
+	raises(Function(code[i++]), ReferenceError, "if Statement");
+	raises(Function(code[i++]), ReferenceError, "for Loop");
+	raises(Function(code[i++]), ReferenceError, "for-in Loop");
+	raises(Function(code[i++]), ReferenceError, "for-inside Loop");
+	raises(Function(code[i++]), ReferenceError, "while Loop");
+	raises(Function(code[i++]), ReferenceError, "do-while Loop");
+
+	raises(Function(code[i++]), ReferenceError, "switch/case");
+	raises(Function(code[i++]), ReferenceError, "switch/case/default");
+	
+	equal(code[i++], 1, "Redeclaration of var as let");
+	equal(code[i++], 1, "Lexical scoping");
+});
+
+}
+</script>
+</body>
+</html>

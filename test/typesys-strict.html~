@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link media="screen" type="text/css" rel="stylesheet" href="qunit.css">
+	<title>JS++ Unit Tests: #typesys strict</title>
+	<style type="text/css">
+		code { display: none; }
+	</style>
+</head>
+<body>
+
+<h1 id="qunit-header">JavaScript++ #typesys strict</h1>
+<h2 id="qunit-banner"></h2>
+<div id="qunit-testrunner-toolbar"></div>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+<div id="qunit-fixture">test markup, will be hidden</div>
+
+<!--
+#######################BASIC REQUIREMENTS#######################
+-->
+<code>
+#typesys strict
+
+var foobarbaz as String;
+</code>
+<code>
+#typesys strict
+
+var foo as String, bar as String, baz as String;
+</code>
+<code>
+#typesys strict
+
+var foobarbaz as String = "";
+</code>
+<code>
+#typesys strict
+
+var foo as String = "foo", bar as String = "bar", baz as String = "baz";
+</code>
+<code class="eval">
+#typesys strict
+
+var foobarbaz as String;
+foobarbaz
+</code>
+<code class="eval">
+#typesys strict
+
+let foobarbaz as String = "foobarbaz";
+foobarbaz
+</code>
+
+<!--
+#######################Type Errors#######################
+-->
+<code>
+#typesys strict
+
+var foobarbaz;
+</code>
+<code>
+#typesys strict
+
+var foo as String, bar, baz as Number;
+</code>
+
+<!--
+#######################String Operations - String and String#######################
+-->
+<code>
+#typesys strict
+
+var foo as String = "1" + "1";
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" - "1";
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" * "1";
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" / "1";
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" ** "1";
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" % "1";
+</code>
+
+<code>
+#typesys strict
+
+var foo as String;
+
+foo += "foo";
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo -= "foo";
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo *= "foo";
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo /= "foo";
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo **= "foo";
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo %= "foo";
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo ?= "foo";
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo &&= "foo";
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo ||= "foo";
+</code>
+
+<!--
+#######################String Operations - String and Number#######################
+-->
+<code>
+#typesys strict
+
+var foo as String = "1" + 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" - 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" * 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" / 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" ** 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" % 1;
+</code>
+
+<code>
+#typesys strict
+
+var foo as String = "1" & 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" | 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" ^ 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" << 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" >> 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String = "1" >>> 1;
+</code>
+
+<code>
+#typesys strict
+
+var foo as String;
+
+foo += 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo -= 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo *= 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo /= 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo **= 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo %= 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo ?= 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo &&= 1;
+</code>
+<code>
+#typesys strict
+
+var foo as String;
+
+foo ||= 1;
+</code>
+
+<button onclick="Start()">Start</button>
+
+<script type="text/javascript" src="../jsdefs.js"></script>
+<script type="text/javascript" src="../jsparse.js"></script>
+<script type="text/javascript" src="../compiler.js"></script>
+<script type="text/javascript" src="../typesys/strict.js"></script>
+
+<script type="text/javascript" src="qunit.js"></script>
+<script type="text/javascript">
+var codeTags = document.getElementsByTagName("code"), code = [], c;
+
+for (var i=0, len=codeTags.length; i<len; i++) {
+	c = new compiler(window.narcissus.jsparse((codeTags[i].innerText||codeTags[i].textContent)));
+	c.preprocess();
+	try {
+		code.push(codeTags[i].className == "eval" ? eval(c.compile()) : c.compile());
+	}catch(e) {
+		code.push(e);
+	}
+}
+
+while(code.length != codeTags.length); //Stop race conditions
+
+function Start() { //Problems with race conditions with qUnit, so wrap in function
+
+var i = 0;
+
+test("Basic Requirements", function() {
+	expect(6);
+	
+	ok(code[i++], "Variable declaration");
+	ok(code[i++], "Multiple variable declaration");
+	ok(code[i++], "Variable initialization");
+	ok(code[i++], "Multiple variable initialization");
+	strictEqual(code[i++], "", "Variable declaration - assert");
+	equal(code[i++], "foobarbaz", "Variable initialization - assert");
+});
+
+test("Type Errors", function() {
+	equal(code[i++].type, TypeError, "No type declaration on single var");
+	equal(code[i++].type, TypeError, "No type declaration in var inside multiple variable declaration");
+});
+
+test("String Operations - String and String", function() {
+	notEqual(code[i++].type, TypeError, "Concatenate strings with + operator");
+	equal(code[i++].type, TypeError, "String - String");
+	equal(code[i++].type, TypeError, "String * String");
+	equal(code[i++].type, TypeError, "String / String");
+	equal(code[i++].type, TypeError, "String ** String");
+	equal(code[i++].type, TypeError, "String % String");
+	
+	notEqual(code[i++].type, TypeError, "String += String");
+	equal(code[i++].type, TypeError, "String -= String");
+	equal(code[i++].type, TypeError, "String *= String");
+	equal(code[i++].type, TypeError, "String /= String");
+	equal(code[i++].type, TypeError, "String **= String");
+	equal(code[i++].type, TypeError, "String %= String");
+	notEqual(code[i++].type, TypeError, "String ?= String");
+	notEqual(code[i++].type, TypeError, "String &&= String");
+	notEqual(code[i++].type, TypeError, "String ||= String");
+});
+
+test("String Operations - String and Number", function() {
+	equal(code[i++].type, TypeError, "String + Number");
+	equal(code[i++].type, TypeError, "String - Number");
+	equal(code[i++].type, TypeError, "String * Number");
+	equal(code[i++].type, TypeError, "String / Number");
+	equal(code[i++].type, TypeError, "String ** Number");
+	equal(code[i++].type, TypeError, "String % Number");
+	
+	equal(code[i++].type, TypeError, "String & Number");
+	equal(code[i++].type, TypeError, "String | Number");
+	equal(code[i++].type, TypeError, "String ^ Number");
+	equal(code[i++].type, TypeError, "String << Number");
+	equal(code[i++].type, TypeError, "String >> Number");
+	equal(code[i++].type, TypeError, "String >>> Number");
+	
+	equal(code[i++].type, TypeError, "String += Number");
+	equal(code[i++].type, TypeError, "String -= Number");
+	equal(code[i++].type, TypeError, "String *= Number");
+	equal(code[i++].type, TypeError, "String /= Number");
+	equal(code[i++].type, TypeError, "String **= Number");
+	equal(code[i++].type, TypeError, "String %= Number");
+	equal(code[i++].type, TypeError, "String ?= Number");
+	equal(code[i++].type, TypeError, "String &&= Number");
+	equal(code[i++].type, TypeError, "String ||= Number");
+});
+
+}
+</script>
+</body>
+</html>
