@@ -1,0 +1,57 @@
+JavaScript++ Alpha 0.01
+-----------------------
+
+JavaScript++ provides the same familiar C-style language syntax of JavaScript and brings modern language features such as classes; block scoping and constants; pluggable type systems; packages and modules; comprehensive standard libraries; enhanced regular expressions; and more to JavaScript with almost no learning curve through an extended ES3 grammar.
+
+This is an early alpha preview version.
+
+Official website: http://jspp.javascript.am/
+
+Tutorial: http://jspp.javascript.am/tutorial.html
+
+Installation & Usage
+---------------------
+1. Download the JavaScript++ compiler source code and open compiler.html in your favorite web browser.
+
+2. Type into the HTML textbox:
+
+let foo = "Hello World";
+alert(foo);
+
+3. Click "Compile"
+
+4. Click "Execute" to run the compiled code.
+
+5. Copy the compiled code to a .js file and execute it in your browser or server.
+
+6. Open your browser's console to view the warnings and errors produced by the compiler.
+
+A command-line compiler is not available for the current alpha.
+
+A command-line REPL is not available for the current alpha.
+
+You can join us on IRC at #javascript++ on freenode and use jsppBot as a sort of REPL.
+
+File Descriptions
+-----------------
+jsdefs.js - Lookup tables
+jsparse.js - Lexer/parser
+compiler.js - Code generator
+es3.js - Emulation of ES3 environment so, for example, the compiler won't throw warnings that "String" or "Number" have not been declared.
+
+lib/ - Standard Library
+lib/dom - DOM libraries
+lib/jspp - JavaScript++ libraries.  Language only; does not manipulate or depend on host objects
+lib/jspp/lang/es5.js - Incorporates ES5 features such as array extras and Function.prototype.bind
+lib/jspp/lang/json2.js - JSON library
+lib/server - Server-side JavaScript libraries
+
+typesys/ - Pluggable type systems
+typesys/strict.js - Strong, static typing for JavaScript++
+
+test/ - Unit tests
+test/qunit.js - QUnit JS file
+test/qunit.css - QUnit CSS file
+test/classes.html - Unit tests for classes
+test/scopes.html - Unit tests for scopes
+test/typesys-strict.html - Unit tests for #typesys strict
