@@ -66,7 +66,7 @@
         
         // Operators and punctuators.  Some pair-wise order matters, e.g. (+, -)
         // and (UNARY_PLUS, UNARY_MINUS).
-        "\n", ";",
+        "\n", ";", "...",
         ",",
         "=",
         "?", ":", "CONDITIONAL",
@@ -80,17 +80,18 @@
         "<<", ">>", ">>>",
         "+", "-",
         "*", "/", "%",
-        "!", "~", "UNARY_PLUS", "UNARY_MINUS",
+        "!", "~", "UNARY_PLUS", "UNARY_MINUS", "UNARY_EXISTS",
         "++", "--",
         ".",
         "[", "]",
         "{", "}",
         "(", ")",
+        "**",
         
         // Nonterminal tree node type codes.
         "SCRIPT", "BLOCK", "LABEL", "FOR_IN", "CALL", "NEW_WITH_ARGS", "INDEX",
         "ARRAY_INIT", "OBJECT_INIT", "PROPERTY_INIT", "GETTER", "SETTER",
-        "GROUP", "LIST",
+        "GROUP", "LIST", "FOR_INSIDE", "ARRAY_COMP",
         
         // Terminals.
         "IDENTIFIER", "NUMBER", "STRING", "REGEXP",
@@ -99,14 +100,14 @@
         "break",
         "class", "case", "catch", "const", "continue",
         "debugger", "default", "delete", "do",
-        "else", "enum", "extends",
+        "else", "enum", "extends", "extension",
         "false", "finally", "for", "function",
         "if", "in", "inside", "instanceof",
         "new", "null",
         "private", "protected", "public",
         "return",
         "static", "switch",
-        "this", "throw", "true", "try", "typeof",
+        "this", "throw", "true", "try", "typeof", "#typesys",
         "var", "void", "as", "let",
         "while", "with"
     ];
@@ -119,6 +120,7 @@
         [   '\n',   "NEWLINE"],
         [   ';',    "SEMICOLON"],
         [   ',',    "COMMA"],
+        [   '...',  "RANGE"],
         [   '?',    "HOOK"],
         [   ':',    "COLON"],
         [   '||',   "OR"],
@@ -140,6 +142,7 @@
         [   '>',    "GT"],
         [   '++',   "INCREMENT"],
         [   '--',   "DECREMENT"],
+        [   '**',   "EXPONENT"],
         [   '+',    "PLUS"],
         [   '-',    "MINUS"],
         [   '*',    "MUL"],
@@ -153,7 +156,8 @@
         [   '{',    "LEFT_CURLY"],
         [   '}',    "RIGHT_CURLY"],
         [   '(',    "LEFT_PAREN"],
-        [   ')',    "RIGHT_PAREN"]
+        [   ')',    "RIGHT_PAREN"],
+        ['#typesys',"TYPESYS"]
     ];
 
     var opTypeNames = jsdef.opTypeNames = (function () {
@@ -204,7 +208,7 @@
     })();
 
     // Map assignment operators to their indexes in the tokens array.
-    var assignOps = jsdef.assignOps = ['|', '^', '&', '<<', '>>', '>>>', '+', '-', '*', '/', '%', '&&', '||'];
+    var assignOps = jsdef.assignOps = ['|', '^', '&', '<<', '>>', '>>>', '+', '-', '*', '/', '%', '&&', '||', '**', '?'];
 
     for (var i = 0, j = assignOps.length; i < j; i++) {
         var t = assignOps[i];

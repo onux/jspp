@@ -1,3 +1,42 @@
+10/7/11
+-------
+* Added compiler.html - web page to invoke compiler
+* Fixed bugs with destructuring assignments and block scoping
+
+10/3/11
+-------
+* Parses and compiles all regular JavaScript tokens now
+* Added exponent operator
+* Added heredocs and multi-line strings
+
+10/2/11
+-------
+* #typesys strict handles functions and function calls
+* #typesys strict handles typed arrays (StringArray et al - NOT WebGL typed arrays)
+
+10/1/11
+-------
+* Added type inference to object declarations in #typesys strict
+	Example: var a as Object = {
+				 foo: "foo", //inferred as String
+				 bar: 1 //inferred as Number
+			 };
+	Easier to compose instead of declaring a type for each property.
+
+9/30/11
+-------
+* Created type system: #typesys strict (Strong, static typing)
+
+9/23/11
+-------
+* Added array comprehensions
+* Added array operators, e.g. [1, 2, 3] *= 5
+
+9/15/11
+-------
+* Added pluggable type systems
+* Added es5.js to standard library to allow for array extras et al
+
 9/1/11
 -------
 * Added classes.  Nested classes, subclasses, access modifiers (private, public, protected), polymorphism, super, constructors, destructors, instance members, static members, overloadable methods, singletons, anonymous classes, classes as first-class citizens

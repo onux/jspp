@@ -83,14 +83,19 @@
             var opRegExp = new RegExp(opRegExpSrc);
 
             // A regexp to match floating point literals (but not integer literals).
-            var fpRegExp = /^\d+\.\d*(?:[eE][-+]?\d+)?|^\d+(?:\.\d*)?[eE][-+]?\d+|^\.\d+(?:[eE][-+]?\d+)?/;
+            //var fpRegExp = /^\d+\.\d*(?:[eE][-+]?\d+)?|^\d+(?:\.\d*)?[eE][-+]?\d+|^\.\d+(?:[eE][-+]?\d+)?/;
+            //The below regex prevents '1..toString()' but not '1 .toString()' so we can implement the spread operator
+            var fpRegExp = /^\d+\.(?!\.)\d*(?:[eE][-+]?\d+)?|^\d+(?:\.\d*)?[eE][-+]?\d+|^\.\d+(?:[eE][-+]?\d+)?/;
 
             // A regexp to match regexp literals.
             //var reRegExp = /^\/((?:\\.|\[(?:\\.|[^\]])*\]|[^\/])+)\/([gimy]*)/;
             var reRegExp = /^(?:m(x)?|(?=\/))([^\w\s\\])((?:\\.|(?!\2)[^\\])*)\2([a-z]*)/;
-            //var reRegExp = /^m(x)?([^\w\s\\])((?:\\.|(?!\2)[^\\])*)(?:\2((?:\\.|(?!\2)[^\\])*))?\2([a-z]*)/;
             
             var scopeId = 0;
+            
+        	var ArrayTypes = ["ArrayArray", "BooleanArray", "DateArray",
+        		  "FunctionArray", "NumberArray", "ObjectArray", "RegExpArray",
+				  "StringArray"];
 
             function Tokenizer(s, f, l) {
                 this.cursor = 0;
@@ -200,9 +205,17 @@
                         var id = match[0];
                         token.type = jsdef.keywords(id) || jsdef.IDENTIFIER;
                         token.value = id;
-                    } else if ((match = /^"(?:\\.|[^"])*"|^'(?:\\.|[^'])*'/.exec(input))) { // "){
+                    } else if ((match = /^"(?!")(?:\\.|[^"])*"|^'(?!')(?:\\.|[^'])*'|^(['"]{3})((?:(?!\1)[\s\S])*)\1|^""|^''/.exec(input))) { // "){
                         token.type = jsdef.STRING;
-                    token.value = eval(match[0]);
+                        
+                        if (match[1]) {
+                        	this.lineno += match[2].split(/\r?\n/gm).length-1;
+                        	token.value = match[2].split(/\r?\n\r?/gm);
+                        }
+                        else {
+                        	this.lineno += match[0].split(/\r?\n/gm).length-1;
+		                    token.value = match[0].replace(/^['"]|['"]$/gm, "");
+		                }
                 } else if (this.scanOperand && (match = reRegExp.exec(input))) {
                     token.type = jsdef.REGEXP;
                     token.value = [match[1], match[2], match[3], match[4]];
@@ -215,8 +228,13 @@
                     } else {
                         token.type = jsdef[jsdef.opTypeNames[op]];
                         if (this.scanOperand &&
-                            (token.type == jsdef.PLUS || token.type == jsdef.MINUS)) {
-                            token.type += jsdef.UNARY_PLUS - jsdef.PLUS;
+                            (token.type == jsdef.PLUS || token.type == jsdef.MINUS ||
+                             token.type == jsdef.HOOK)) {
+                            if (token.type == jsdef.HOOK) {
+	                            token.type = jsdef.tokens.indexOf("UNARY_EXISTS");
+	                        }else {
+                            	token.type += jsdef.UNARY_PLUS - jsdef.PLUS;
+                            }
                         }
                         token.assignOp = null;
                     }
@@ -399,6 +417,37 @@
                 n = Statements(t, x);
                 t.mustMatch(jsdef.RIGHT_CURLY);
                 return n;
+                
+            case jsdef.EXTENSION:
+            	n = new Node(t);
+            	
+            	t.mustMatch(jsdef.IDENTIFIER);
+            	
+            	var root = new Node(t), dots = [root];
+            	
+            	if (t.peek() == jsdef.DOT) {
+		        	do {
+		        		if (!t.match(jsdef.DOT)) break;				    	
+					    t.mustMatch(jsdef.IDENTIFIER);
+				        dots.push(new Node(t, jsdef.DOT, dots[dots.length-1], new Node(t)));
+			        } while (t.peek() != jsdef.LEFT_CURLY);
+			        
+			        n2 = dots.pop();
+	            }else {
+		        	n2 = new Node(t);
+		        }
+	            
+	            n.object = n2;
+	            
+	            if (t.peek() == jsdef.LEFT_CURLY) {
+		            n.extend = Expression(t, x);
+		        }
+		        
+		        if (!n.extend || (n.extend && n.extend.type != jsdef.OBJECT_INIT)) {
+			        throw t.newSyntaxError("Invalid object extension");
+		        }
+            	
+            	return n;
 
             case jsdef.IF:
                 n = new Node(t);
@@ -459,21 +508,37 @@
                 }
                 if (n2 && t.match(jsdef.IN)) {
                     n.type = jsdef.FOR_IN;
-                    if (n2.type == jsdef.VAR) {
+                    if (n2.type == jsdef.VAR || n2.type == jsdef.LET) {
                         if (n2.length != 1) {
                             throw new SyntaxError("Invalid for..in left-hand side",
                                                   t.filename, n2.lineno);
                         }
 
-                        // NB: n2[0].type == jsdef.IDENTIFIER and n2[0].value == n2[0].name.
-                        n.iterator = n2[0];
+                        n.iterator = n2;
                         n.varDecl = n2;
                     } else {
                         n.iterator = n2;
                         n.varDecl = null;
                     }
                     n.object = Expression(t, x);
-                } else {
+                }
+                else if (n2 && t.match(jsdef.INSIDE)) {
+                    n.type = jsdef.FOR_INSIDE;
+                    if (n2.type == jsdef.VAR || n2.type == jsdef.LET) {
+                        if (n2.length != 1) {
+                            throw new SyntaxError("Invalid for..inside left-hand side",
+                                                  t.filename, n2.lineno);
+                        }
+
+                        n.iterator = n2;
+                        n.varDecl = n2;
+                    } else {
+                        n.iterator = n2;
+                        n.varDecl = null;
+                    }
+                    n.object = Expression(t, x);
+                }
+                else {
                     n.setup = n2 || null;
                     t.mustMatch(jsdef.SEMICOLON);
                     n.condition = (t.peek() == jsdef.SEMICOLON) ? null : Expression(t, x);
@@ -586,8 +651,11 @@
 
             case jsdef.VAR:
             case jsdef.CONST:
+                n = Variables(t, x);
+                break;
             case jsdef.LET:
                 n = Variables(t, x);
+                n.block = true;
                 break;
 
             case jsdef.DEBUGGER:
@@ -644,6 +712,10 @@
                 f.name = t.token().value;
             else if (requireName)
                 throw t.newSyntaxError(jsparse.MISSING_FUNCTION_IDENTIFIER);
+                
+            if (t.match(jsdef.AS) && t.mustMatch(jsdef.IDENTIFIER)) {
+            	f.returntype = t.token().value;
+			}
             
             t.mustMatch(jsdef.LEFT_PAREN);
             f.params = [];
@@ -654,8 +726,12 @@
             	t.mustMatch(jsdef.RIGHT_PAREN);
             }
             else {
-            	t.get();
+            	var tt, restParam = false;
+            	tt = t.get();
 		        do {
+                    if (tt != jsdef.IDENTIFIER)
+                    	throw t.newSyntaxError("Missing formal parameter");
+                    	
 		            n2 = new Node(t);
 		            n2.name = n2.value;
 		            if (t.match(jsdef.AS)) {
@@ -665,16 +741,29 @@
 		                n2.vartype = new Node(t).value;
 					}
 		            if (t.match(jsdef.ASSIGN)) {
-		                if (t.token().assignOp)
+		                if (t.token().assignOp || restParam)
 		                    throw t.newSyntaxError("Invalid variable initialization");
 		                n2.initializer = Expression(t, x, jsdef.COMMA);
 		            }
+		            if (restParam) n2.restParameter = true;
 		            f.params.push(n2.value);
 		            f.paramsList.push(n2);
 		            
-		            if (t.peek() != jsdef.RIGHT_PAREN)
+		            if (restParam && t.peek() != jsdef.RIGHT_PAREN) {
+			            throw t.newSyntaxError("Rest parameters must be the last paramter");
+		            }
+		            else if (t.peek() != jsdef.RIGHT_PAREN) {
 		                t.mustMatch(jsdef.COMMA);
-		        } while (t.get() != jsdef.RIGHT_PAREN);
+		                
+		                //Rest parameters
+		                if (t.peek() == jsdef.RANGE) {
+		                	t.mustMatch(jsdef.RANGE);
+		                	restParam = true;
+		                }
+		                else if (t.peek() != jsdef.IDENTIFIER)
+		                	throw t.newSyntaxError("Missing formal parameter");
+		            }
+		        } while ((tt = t.get()) != jsdef.RIGHT_PAREN);
 		    }
 		    
             f.static = t.static;
@@ -688,10 +777,29 @@
             t.public = false;
             t.protected = false;
 
-            t.mustMatch(jsdef.LEFT_CURLY);
-            var x2 = new CompilerContext(true);
-            f.body = Script(t, x2);
-            t.mustMatch(jsdef.RIGHT_CURLY);
+			var x2;
+            if (t.match(jsdef.LEFT_CURLY)) {
+            	x2 = new CompilerContext(true);
+            	f.body = Script(t, x2);
+            	t.mustMatch(jsdef.RIGHT_CURLY);
+            }
+            else {
+            	x2 = new CompilerContext(true);
+            	
+            	var n3 = new Node(t);
+		        n3.type = jsdef.SCRIPT;
+		        n3.funDecls = x2.funDecls;
+		        n3.varDecls = x2.varDecls;
+		        n3.contextId = ++contextId;
+		        n3.scopeId = ++scopeId;
+		        t.expClosure = true;
+		        n3[0] = Expression(t, x2);
+		        if (n3[0].type != jsdef.RETURN) {
+			        throw t.newSyntaxError("Missing return in expression closure");
+		        }
+		        
+            	f.body = n3;
+            }
             f.end = t.token().end;
 
             f.functionForm = functionForm;
@@ -819,31 +927,102 @@
 
         function Variables(t, x) {
             var n = new Node(t);
-            do {
-                n.public = t.public;
-                n.private = t.private;
-                n.protected = t.protected;
-                n.static = t.static;
-                
-                t.mustMatch(jsdef.IDENTIFIER);
-                var n2 = new Node(t);
-                n2.name = n2.value;
-                if (t.match(jsdef.AS)) {
-                	if (t.token().assignOp)
-                        throw t.newSyntaxError("Invalid variable initialization");
-                    t.mustMatch(jsdef.IDENTIFIER);
-                    n2.vartype = new Node(t).value;
-				}
-                if (t.match(jsdef.ASSIGN)) {
-                    if (t.token().assignOp)
-                        throw t.newSyntaxError("Invalid variable initialization");
-                    n2.initializer = Expression(t, x, jsdef.COMMA);
+            
+            //Destructuring assignments
+            if (t.match(jsdef.LEFT_BRACKET)) {
+                var n2 = new Node(t, jsdef.ARRAY_INIT), vartype = "";
+                while ((tt = t.peek()) != jsdef.RIGHT_BRACKET) {
+                    if (tt == jsdef.COMMA) {
+                        t.get();
+                        
+                        emptyEl = new Node(t, jsdef.VOID);
+                        emptyEl[0] = new Node(t, jsdef.NUMBER);
+                        emptyEl[0].value = 0;
+                        n2.push(emptyEl);
+                        
+                        continue;
+                    }
+                    if (t.match(jsdef.IDENTIFIER)) {
+                    	n2.push(new Node(t));
+                    }
+                    else {
+	                    throw t.newSyntaxError("Invalid variable initialization");
+                    }
+                    if (!t.match(jsdef.COMMA))
+                        break;
                 }
-                n2.readOnly = (n.type == jsdef.CONST);
+                t.mustMatch(jsdef.RIGHT_BRACKET);
+                
+        		if (t.match(jsdef.AS)) {
+		        	if (t.token().assignOp)
+		                throw t.newSyntaxError("Invalid variable initialization");
+		            t.mustMatch(jsdef.IDENTIFIER);
+		            vartype = t.token().value;
+		            if (t.match(jsdef.LEFT_BRACKET)) {
+		            	t.mustMatch(jsdef.RIGHT_BRACKET);
+		            	n2.vartype = vartype + "[]";
+		            }else {
+			            n2.vartype = new Node(t).value;
+			            
+			            //Convert StringArray to String[], NumberArray to
+			            //Number[], etc.
+			            n2.vartype = ~ArrayTypes.indexOf(n2.vartype) ?
+							n2.vartype.replace(/Array$/, "[]") :
+							n2.vartype;
+			        }
+				}
+                
+                if (t.match(jsdef.ASSIGN)) {
+	                if (t.token().assignOp)
+	                    throw t.newSyntaxError("Invalid variable initialization");
+	                n2.initializer = Expression(t, x, jsdef.COMMA);
+	            }
+	            
+	            n.push(n2);
+	            x.varDecls.push(n2);
+	            //t.scanOperand = false;
+            }
+            //Regular variable declarations
+            else {
+		        do {
+		            n.public = t.public;
+		            n.private = t.private;
+		            n.protected = t.protected;
+		            n.static = t.static;
 
-                n.push(n2);
-                x.varDecls.push(n2);
-            } while (t.match(jsdef.COMMA));
+			        t.mustMatch(jsdef.IDENTIFIER);
+			        var n2 = new Node(t), vartype = "";
+			        n2.name = n2.value;
+			        if (t.match(jsdef.AS)) {
+			        	if (t.token().assignOp)
+			                throw t.newSyntaxError("Invalid variable initialization");
+			            t.mustMatch(jsdef.IDENTIFIER);
+			            vartype = t.token().value;
+			            if (t.match(jsdef.LEFT_BRACKET)) {
+			            	t.mustMatch(jsdef.RIGHT_BRACKET);
+			            	n2.vartype = vartype + "[]";
+			            }
+			            else {
+				            n2.vartype = new Node(t).value;
+				            
+				            //Convert StringArray to String[], NumberArray to
+				            //Number[], etc.
+				            n2.vartype = ~ArrayTypes.indexOf(n2.vartype) ?
+								n2.vartype.replace(/Array$/, "[]") :
+								n2.vartype;
+				        }
+					}
+			        if (t.match(jsdef.ASSIGN)) {
+			            if (t.token().assignOp)
+			                throw t.newSyntaxError("Invalid variable initialization");
+			            n2.initializer = Expression(t, x, jsdef.COMMA);
+			        }
+		            n2.readOnly = (n.type == jsdef.CONST);
+
+		            n.push(n2);
+		            x.varDecls.push(n);
+		        } while (t.match(jsdef.COMMA));
+            }
             return n;
         }
 
@@ -856,7 +1035,7 @@
 
         var opPrecedence = {
             SEMICOLON: 0,
-            COMMA: 1,
+            COMMA: 1, TYPESYS: 1,
             ASSIGN: 2, HOOK: 2, COLON: 2,
             // The above all have to have the same precedence, see bug 330975.
             OR: 4,
@@ -870,7 +1049,8 @@
             PLUS: 12, MINUS: 12,
             MUL: 13, DIV: 13, MOD: 13, REGEXP_MATCH: 13,
             DELETE: 14, VOID: 14, TYPEOF: 14, // PRE_INCREMENT: 14, PRE_DECREMENT: 14,
-            NOT: 14, BITWISE_NOT: 14, UNARY_PLUS: 14, UNARY_MINUS: 14,
+            NOT: 14, BITWISE_NOT: 14, UNARY_PLUS: 14, UNARY_MINUS: 14, UNARY_EXISTS: 14, 
+            RANGE: 14, EXPONENT: 14,
             INCREMENT: 15, DECREMENT: 15,     // postfix
             PUBLIC: 16, PRIVATE: 16, PROTECTED: 16, STATIC: 16,
             NEW: 17,
@@ -895,12 +1075,13 @@
             LSH: 2, RSH: 2, URSH: 2,
             PLUS: 2, MINUS: 2,
             MUL: 2, DIV: 2, MOD: 2,
-            DELETE: 1, VOID: 1, TYPEOF: 1,  // PRE_INCREMENT: 1, PRE_DECREMENT: 1,
-            NOT: 1, BITWISE_NOT: 1, UNARY_PLUS: 1, UNARY_MINUS: 1,
+            EXPONENT: 2,
+            DELETE: 1, VOID: 1, TYPEOF: 1, TYPESYS: 1, // PRE_INCREMENT: 1, PRE_DECREMENT: 1,
+            NOT: 1, BITWISE_NOT: 1, UNARY_PLUS: 1, UNARY_MINUS: 1, UNARY_EXISTS: 1,
             INCREMENT: 1, DECREMENT: 1,     // postfix
             NEW: 1, NEW_WITH_ARGS: 2, DOT: 2, INDEX: 2, CALL: 2,
             ARRAY_INIT: 1, OBJECT_INIT: 1, GROUP: 1,
-            REGEXP_MATCH: 1,
+            REGEXP_MATCH: 1, RANGE: 2,
             PUBLIC: 1, PRIVATE: 1, PROTECTED: 1, STATIC: 1
         };
 
@@ -1005,11 +1186,16 @@
                 case jsdef.LSH: case jsdef.RSH: case jsdef.URSH:
                 case jsdef.PLUS: case jsdef.MINUS:
                 case jsdef.MUL: case jsdef.DIV: case jsdef.MOD:
+                case jsdef.EXPONENT:
                 case jsdef.DOT:
+                case jsdef.RANGE:
                     if (t.scanOperand)
                         break loop;
                     while (opPrecedence[operators.top().type] >= opPrecedence[tt])
                         reduce();
+                    if (tt == jsdef.RANGE && !x.inArrayInit) {
+                    	throw t.newSyntaxError("Invalid ... operator");
+                    }
                     if (tt == jsdef.DOT) {
                         t.mustMatch(jsdef.IDENTIFIER);
                         operands.push(new Node(t, jsdef.DOT, operands.pop(), new Node(t)));
@@ -1019,9 +1205,9 @@
                     }
                     break;
 
-                case jsdef.DELETE: case jsdef.VOID: case jsdef.TYPEOF:
+                case jsdef.DELETE: case jsdef.VOID: case jsdef.TYPEOF: case jsdef.TYPESYS:
                 case jsdef.NOT: case jsdef.BITWISE_NOT: case jsdef.UNARY_PLUS: case jsdef.UNARY_MINUS:
-                case jsdef.NEW: case jsdef.REGEXP_MATCH:
+                case jsdef.NEW: case jsdef.REGEXP_MATCH: case jsdef.UNARY_EXISTS:
                     if (!t.scanOperand)
                         break loop;
                     operators.push(new Node(t));
@@ -1067,24 +1253,138 @@
                     operands.push(new Node(t));
                     t.scanOperand = false;
                     break;
+                    
+                //"return" as an expression for expression closures
+                //e.g. [1,2,3].map(function() return 1 + 1)
+                case jsdef.RETURN:
+		            if (!x.inFunction || !t.expClosure)
+		                throw t.newSyntaxError("Invalid return");
+		            n = new Node(t);
+		            tt = t.peekOnSameLine();
+		            if (tt != jsdef.END && tt != jsdef.NEWLINE && tt != jsdef.SEMICOLON && tt != jsdef.RIGHT_CURLY)
+		                n.value = Expression(t, x);
+		            operands.push(n);
+		            t.scanOperand = false;
+		            break;
 
                 case jsdef.LEFT_BRACKET:
                     if (t.scanOperand) {
                         // Array initialiser.  Parse using recursive descent, as the
                         // sub-grammar here is not an operator grammar.
                         n = new Node(t, jsdef.ARRAY_INIT);
+                        x.inArrayInit = true;
+                        var counter = 0, n2, emptyEl;
                         while ((tt = t.peek()) != jsdef.RIGHT_BRACKET) {
+                        	counter++;
                             if (tt == jsdef.COMMA) {
                                 t.get();
-                                n.push(null);
+                                //n.push(null); //Removed from Narcissus as it won't parse [a,,b]
+                                
+                                //Parse empty elements [,,,] as void 0
+                                emptyEl = new Node(t, jsdef.VOID);
+                                emptyEl[0] = new Node(t, jsdef.NUMBER);
+                                emptyEl[0].value = 0;
+                                n.push(emptyEl);
+                                
                                 continue;
                             }
                             n.push(Expression(t, x, jsdef.COMMA));
+                            
+                            //Array comprehensions
+                            if (counter == 1 && t.peek() == jsdef.FOR) {
+                            	n.type = jsdef.ARRAY_COMP;
+                            	
+                            	n2 = new Node(t);
+	                            t.mustMatch(jsdef.FOR);
+    	                        t.mustMatch(jsdef.LEFT_PAREN);
+    	                        
+    	                        if (t.match(jsdef.VAR) || t.match(jsdef.LET)) {
+    	                        	x.inForLoopInit = true;
+    	                        	n2.iterator = Variables(t, x);
+    	                        	x.inForLoopInit = false;
+    	                        }
+    	                        else if (t.match(jsdef.IDENTIFIER)) {
+    	                        	x.inForLoopInit = true;
+    	                        	t.unget();
+    	                        	n2.iterator = Expression(t, x);
+    	                        	x.inForLoopInit = false;
+    	                        }
+    	                        else {
+	    	                        throw t.newSyntaxError("Missing ] after element list");
+    	                        }
+    	                        
+    	                        if (t.match(jsdef.IN)) {
+    	                        	n2.type = jsdef.FOR_IN;
+    	                        	n2.object = Expression(t, x);
+    	                        }
+    	                        else if (t.match(jsdef.INSIDE)) {
+    	                        	n2.type = jsdef.FOR_INSIDE;
+    	                        	n2.object = Expression(t, x);
+    	                        }
+    	                        else {
+	    	                        throw t.newSyntaxError("Missing ] after element list");
+    	                        }
+    	                        t.mustMatch(jsdef.RIGHT_PAREN);
+    	                        n.push(n2);
+    	                        
+    	                        while (t.peek() != jsdef.RIGHT_BRACKET) {
+    	                        	n2 = new Node(t);
+    	                        	
+    	                        	if (t.match(jsdef.IF)) {
+    	                        		n2.type = jsdef.IF;
+    	                        		
+    	                        		t.mustMatch(jsdef.LEFT_PAREN);
+    	                        		n2.condition = Expression(t, x);
+    	                        		t.mustMatch(jsdef.RIGHT_PAREN);
+    	                        	}
+    	                        	else if (t.match(jsdef.FOR)) {
+		    	                        t.mustMatch(jsdef.LEFT_PAREN);
+    	                        
+					                    if (t.match(jsdef.VAR) || t.match(jsdef.LET)) {
+					                    	x.inForLoopInit = true;
+					                    	n2.iterator = Variables(t, x);
+					                    	x.inForLoopInit = false;
+					                    }
+					                    else if (t.match(jsdef.IDENTIFIER)) {
+					                    	x.inForLoopInit = true;
+					                    	t.unget();
+					                    	n2.iterator = Expression(t, x);
+					                    	x.inForLoopInit = false;
+					                    }
+					                    else {
+						                    throw t.newSyntaxError("Missing ] after element list");
+					                    }
+					                    
+					                    if (t.match(jsdef.IN)) {
+					                    	n2.type = jsdef.FOR_IN;
+					                    	n2.object = Expression(t, x);
+					                    }
+					                    else if (t.match(jsdef.INSIDE)) {
+					                    	n2.type = jsdef.FOR_INSIDE;
+					                    	n2.object = Expression(t, x);
+					                    }
+					                    else {
+						                    throw t.newSyntaxError("Missing ] after element list");
+					                    }
+					                    
+					                    t.mustMatch(jsdef.RIGHT_PAREN);
+    	                        	}
+    	                        	else {
+    	                        		throw t.newSyntaxError("Missing ] after element list");
+    	                        	}
+    	                        	
+    	                        	n.push(n2);
+    	                        }
+    	                        
+                            	break;
+                            }
+                            
                             if (!t.match(jsdef.COMMA))
                                 break;
                         }
                         t.mustMatch(jsdef.RIGHT_BRACKET);
                         operands.push(n);
+                        x.inArrayInit = false;
                         t.scanOperand = false;
                     } else {
                         // Property indexing operator.
@@ -1118,7 +1418,8 @@
                                 if (x.ecmaStrictMode)
                                     throw t.newSyntaxError("Illegal property accessor");
                                 n.push(FunctionDefinition(t, x, true, EXPRESSED_FORM));
-                            } else {
+                            }
+                            else {
                                 switch (tt) {
                                 case jsdef.IDENTIFIER:
                                 case jsdef.NUMBER:
@@ -1162,16 +1463,19 @@
                         n = operators.top();
                         t.scanOperand = true;
                         if (t.match(jsdef.RIGHT_PAREN)) {
-                            if (n.type == jsdef.NEW) {
-                                --operators.length;
-                                n.push(operands.pop());
-                            } else {
-                                n = new Node(t, jsdef.CALL, operands.pop(),
-                                             new Node(t, jsdef.LIST));
-                            }
-                            operands.push(n);
-                            t.scanOperand = false;
-                            break;
+	                        if (n.type == jsdef.NEW) {
+	                            --operators.length;
+	                            n.push(operands.pop());
+	                        }
+	                        else if(n.type == jsdef.IDENTIFIER) {
+	                        	--operators.length;
+	                        } else {
+	                            n = new Node(t, jsdef.CALL, operands.pop(),
+	                                         new Node(t, jsdef.LIST));
+	                        }
+	                        operands.push(n);
+	                        t.scanOperand = false;
+	                        break;
                         }
                         if (n.type == jsdef.NEW)
                             n.type = jsdef.NEW_WITH_ARGS;
