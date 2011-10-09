@@ -1915,7 +1915,7 @@ compiler.prototype.compile = function (ast) {
 									_this.scopes[find.scopeId].map_BlockVars[findIdentifier]);
 							}
 							//Handle class members
-							else if (find.isClassMember) {
+							else if (find.isClassMember && _this.classScopes.length) {
 								if (find.data["[[Static]]"]) {
 									if (find.data["[[Private]]"]) {
 										out.push(findIdentifier);
@@ -1925,8 +1925,7 @@ compiler.prototype.compile = function (ast) {
 												 "__PROTECTED__." + findIdentifier);
 									}
 									else {
-										out.push(find.data["[[MemberOf]]"] + "." + 
-												 findIdentifier);
+										out.push(findIdentifier);
 									}
 								}
 								else if (find.data["[[Public]]"]) {
