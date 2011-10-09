@@ -729,7 +729,11 @@
             	var tt, restParam = false;
             	tt = t.get();
 		        do {
-                    if (tt != jsdef.IDENTIFIER)
+		        	if (tt == jsdef.RANGE) {
+		        		t.get();
+		        		restParam = true;
+		        	}
+                    else if (tt != jsdef.IDENTIFIER)
                     	throw t.newSyntaxError("Missing formal parameter");
                     	
 		            n2 = new Node(t);
