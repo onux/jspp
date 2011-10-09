@@ -116,6 +116,13 @@ foo
 })()
 </code>
 <code class="eval">
+(function(foo) {
+	{ let foo = 2; }
+
+	return foo;
+})(1)
+</code>
+<code class="eval">
 (function() {
 	{
 		let foo = 1;
@@ -172,6 +179,7 @@ test("Block Scope", function() {
 	raises(Function(code[i++]), ReferenceError, "switch/case/default");
 	
 	equal(code[i++], 1, "Redeclaration of var as let");
+	equal(code[i++], 1, "Redeclaration of function parameter with let");
 	equal(code[i++], 1, "Lexical scoping");
 });
 

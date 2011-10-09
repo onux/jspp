@@ -1844,7 +1844,8 @@ compiler.prototype.compile = function (ast) {
 				
 				//Has this variable already been declared in the execution context?
 				for (var j=scope.Variables.length-1; j>=0; j--) {
-					if (scope.Variables[j].identifier !== varList[i]._previousIdentifier) {
+					if (!scope.Variables[j] || 
+						scope.Variables[j].identifier !== varList[i]._previousIdentifier) {
 						continue;
 					}
 				
