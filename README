@@ -1,4 +1,4 @@
-JavaScript++ Alpha 0.01
+JavaScript++ Alpha 0.011
 -----------------------
 
 JavaScript++ provides the same familiar C-style language syntax of JavaScript and brings modern language features such as classes; block scoping and constants; pluggable type systems and type safety; packages and modules; comprehensive standard libraries; enhanced regular expressions and PCRE; and more to JavaScript with almost no learning curve through an extended ES3 grammar.

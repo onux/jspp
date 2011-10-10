@@ -1,3 +1,10 @@
+10/10/11 - Alpha 0.02
+--------
+* Fixed parsing of rest parameters as first parameter
+* Redeclaration of function parameters with let now works properly
+* Static class members are now looked up properly
+* Fixed bug where class members were being looked up outside of class
+
 10/7/11
 -------
 * Added compiler.html - web page to invoke compiler
