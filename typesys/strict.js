@@ -187,6 +187,8 @@ compiler.prototype.typesys.strict = function() {
 		}
 	};
 	
+	var lastReturnType = ""; //the return type of the last function we checked
+	
 	//Internal function for identifier resolution
 	function _resolve(id, Node, Compiler, callback, isDeclaration) {
 		Compiler.LookupScopeChain(id, Compiler.scopeChain.length-2, function(find) {
@@ -237,6 +239,7 @@ compiler.prototype.typesys.strict = function() {
 					break;
 				}
 				else {
+					lastReturnType = Node.returntype;
 					return "Function";
 				}
 			case jsdef.VAR:
@@ -831,7 +834,7 @@ compiler.prototype.typesys.strict = function() {
 				var _TypedArrays = ["Boolean[]", "Date[]", "Function[]",
 								   "Number[]", "Object[]", "RegExp[]",
 								   "String[]"];
-				//TODO: toString, toLowerCase, toUpperCase
+				
 				if (Node[0].type == jsdef.IDENTIFIER) {
 					if (~["Array", "Boolean", "Date", "Function",
 					      "Number", "Object", "RegExp", "String"].indexOf(Node[0].value)) {
@@ -876,17 +879,48 @@ compiler.prototype.typesys.strict = function() {
 						return returntype;
 					}
 				}
+				else if (Node[0].type == jsdef.FUNCTION) {
+					return Node[0].returntype;
+				}
+				else if (Node[0].type == jsdef.GROUP) {
+					var getType = _this.typesys(Node[0], Compiler);
+					
+					if (getType == "Function") {
+						return lastReturnType;
+					}
+					else {
+						Compiler.NewError({
+							type: TypeError,
+							message: "Cannot call " + getType
+						}, Node);
+					}
+				}
+				//TODO: toString, toLowerCase, toUpperCase
+				else if (Node[0].type == jsdef.DOT) {
+				}
 				break;
 				
 			//Miscellaneous expression tokens
 			case jsdef.GROUP:
-				break;
+				return _this.typesys(Node[0], Compiler);
 			case jsdef.COMMA:
-				break;
+				return _this.typesys(Node[+Node.length - 1], Compiler);
 			case jsdef.NEW:
-				break;
+				//TODO: new Class() should return the class
+				return "Object";
 			case jsdef.HOOK:
-				break;
+				var type1 = _this.typesys(Node[1], Compiler),
+					type2 = _this.typesys(Node[2], Compiler);
+					
+				if (type1 === type2) {
+					return type1;
+				}
+				else {
+					Compiler.NewError({
+						type: TypeError,
+						message: "Type mismatch: " + type1 + " and " + type2
+					}, Node);
+				}
 			case jsdef.TYPEOF:
 				return "String";
 			case jsdef.DELETE:
