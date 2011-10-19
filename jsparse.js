@@ -715,6 +715,21 @@
                 
             if (t.match(jsdef.AS) && t.mustMatch(jsdef.IDENTIFIER)) {
             	f.returntype = t.token().value;
+            	
+            	if (t.match(jsdef.LEFT_BRACKET)) {
+	            	t.mustMatch(jsdef.RIGHT_BRACKET);
+	            	f.returntype += "[]";
+	            }else {
+		            f.returntype = new Node(t).value;
+		            
+		            //Convert StringArray to String[], NumberArray to
+		            //Number[], etc.
+		            f.returntype = ~ArrayTypes.indexOf(f.returntype) ?
+						f.returntype.replace(/Array$/, "[]") :
+						f.returntype;
+		        }
+            	
+            	if (t.match(jsdef.NOT)) f.returntype += "!";
 			}
             
             t.mustMatch(jsdef.LEFT_PAREN);
@@ -743,6 +758,21 @@
 		                    throw t.newSyntaxError("Invalid parameter initialization");
 		                t.mustMatch(jsdef.IDENTIFIER);
 		                n2.vartype = new Node(t).value;
+		                
+		                if (t.match(jsdef.LEFT_BRACKET)) {
+				        	t.mustMatch(jsdef.RIGHT_BRACKET);
+				        	n2.vartype += "[]";
+				        }else {
+					        n2.vartype = new Node(t).value;
+					        
+					        //Convert StringArray to String[], NumberArray to
+					        //Number[], etc.
+					        n2.vartype = ~ArrayTypes.indexOf(n2.vartype) ?
+								n2.vartype.replace(/Array$/, "[]") :
+								n2.vartype;
+					    }
+		                
+		                if (t.match(jsdef.NOT)) n2.vartype += "!";
 					}
 		            if (t.match(jsdef.ASSIGN)) {
 		                if (t.token().assignOp || restParam)
@@ -974,6 +1004,8 @@
 							n2.vartype.replace(/Array$/, "[]") :
 							n2.vartype;
 			        }
+			        
+			        if (t.match(jsdef.NOT)) n2.vartype += "!";
 				}
                 
                 if (t.match(jsdef.ASSIGN)) {
@@ -1015,6 +1047,8 @@
 								n2.vartype.replace(/Array$/, "[]") :
 								n2.vartype;
 				        }
+				        
+				        if (t.match(jsdef.NOT)) n2.vartype += "!";
 					}
 			        if (t.match(jsdef.ASSIGN)) {
 			            if (t.token().assignOp)
