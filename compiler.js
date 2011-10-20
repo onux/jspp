@@ -162,7 +162,7 @@ function compiler(ast, options) {
 			else {
 				this.NewWarning({
 					type: ReferenceError,
-					message: 'Compiler global header file "es3.js" not found.'
+					message: 'Compiler global header file "typed-es3.js" not found.'
 				}, {lineno: -1});
 			}
 		}
