@@ -25,12 +25,14 @@ function CreateGlobal(node) {
 		
 		"[[Type]]": "Object",
 		
-		toString: CreateFunction("String"),
-		toLocaleString: CreateFunction("String"),
-		valueOf: CreateFunction("*"),
-		hasOwnProperty: CreateFunction("Boolean", "String"),
-		isPrototypeOf: CreateFunction("Boolean", "Object"),
-		propertyIsEnumerable: CreateFunction("Boolean", "String")
+		properties: {
+			toString: CreateFunction("String"),
+			toLocaleString: CreateFunction("String"),
+			valueOf: CreateFunction("*"),
+			hasOwnProperty: CreateFunction("Boolean", "String"),
+			isPrototypeOf: CreateFunction("Boolean", "Object"),
+			propertyIsEnumerable: CreateFunction("Boolean", "String")
+		}
 	};
 	function CreateObject() {
 		return obj;
@@ -60,61 +62,63 @@ function CreateGlobal(node) {
 			type: jsdef.FUNCTION,
 			returntype: returnType,
 			
-			toString: fn_toString,
-			apply: fn_apply,
-			call: fn_call,
+			properties: {				
+				prototype: {
+					"[[Class]]": "Function",
+					"[[Type]]": "Function",
+					"[[Prototype]]": objPro,
+				
+					"[[DontEnum]]": true,
+					"[[DontDelete]]": true,
+					"[[ReadOnly]]": true,
+				
+					type: jsdef.FUNCTION,
+					returntype: "undefined",
+					
+					properties: {			
+						toString: fn_toString,
+						apply: fn_apply,
+						call: fn_call,
+						length: {
+							"[[DontEnum]]": true,
+							"[[DontDelete]]": true,
+							"[[ReadOnly]]": true,
+				
+							"[[Type]]": "Number"
+						}
+					}
+				},
 			
-			length: {
-				value: arguments.length >>> 0,
+				length: {
+					value: arguments.length >>> 0,
 				
-				"[[DontEnum]]": true,
-				"[[DontDelete]]": true,
-				"[[ReadOnly]]": true,
+					"[[DontEnum]]": true,
+					"[[DontDelete]]": true,
+					"[[ReadOnly]]": true,
 				
-				"[[Type]]": "Number"
+					"[[Type]]": "Number"
+				}
 			}
 		};
 		
-		fun.constructor = {
+		fun.properties.prototype.properties.constructor = {
 			"[[Type]]": "Function",
 			
 			type: jsdef.FUNCTION,
 			returntype: "Function",
 			
-			prototype: {
-				"[[Class]]": "Function",
-				"[[Type]]": "Function",
-				"[[Prototype]]": objPro,
+			properties: {
+				length: {
+					"[[DontEnum]]": true,
+					"[[DontDelete]]": true,
+					"[[ReadOnly]]": true,
 				
-				"[[DontEnum]]": true,
-				"[[DontDelete]]": true,
-				"[[ReadOnly]]": true,
-			
-				toString: fn_toString,
-				apply: fn_apply,
-				call: fn_call,
-				
-				type: jsdef.FUNCTION,
-				returntype: "undefined"
-			},
-			
-			length: {
-				"[[DontEnum]]": true,
-				"[[DontDelete]]": true,
-				"[[ReadOnly]]": true,
-				
-				"[[Type]]": "Number"
+					"[[Type]]": "Number"
+				}
 			}
 		};
-		fun.prototype = {
-			constructor: fun,
-			
-			"[[Prototype]]": _Object,
-			
-			"[[Type]]": "Object" //Non-standard
-		};
-		fun.constructor["[[Prototype]]"] = fun.constructor.prototype;
-		fun.constructor.constructor = fun.constructor;
+		fun.properties.prototype.properties.constructor.properties.prototype =
+			fun.properties.prototype;
 		
 		for (var i=0, len=arguments.length; i<len; i++) {
 			fun[i] = {
@@ -138,18 +142,20 @@ function CreateGlobal(node) {
 		"[[Class]]": "Object",
 		"[[DontDelete]]": false
 	});
-	_Object.prototype = {
+	_Object.properties.prototype = {
 		"[[Prototype]]": null,
 		
-		constructor: _Object,
-		toString: fn_toString,
-		toLocaleString: CreateFunction("String"),
-		valueOf: CreateFunction("*"), //TODO: wrong?
-		hasOwnProperty: CreateFunction("Boolean", "String"),
-		isPrototypeOf: CreateFunction("Boolean", "Object"),
-		propertyIsEnumerable: CreateFunction("Boolean", "String")
+		properties: {
+			constructor: _Object,
+			toString: fn_toString,
+			toLocaleString: CreateFunction("String"),
+			valueOf: CreateFunction("*"), //TODO: wrong?
+			hasOwnProperty: CreateFunction("Boolean", "String"),
+			isPrototypeOf: CreateFunction("Boolean", "Object"),
+			propertyIsEnumerable: CreateFunction("Boolean", "String")
+		}
 	};
-	obj.constructor = _Object; //Object prototype object's constructor is Object constructor
+	obj.properties.constructor = _Object; //Object prototype object's constructor is Object constructor
 	fn_proto["[[Prototype]]"] = CreateObject();
 	
 	//Extend object
@@ -236,11 +242,18 @@ function CreateGlobal(node) {
 	node.Variables.push(_Object);
 	
 	//ES3 15.3: Function Objects
-	var _Function = extend(CreateFunction("Function", "*"), {
+	node.Variables.push(extend(CreateFunction("Function", "*"), {
 		identifier: "Function",
 		value: {},
 	
-		"[[Class]]": "Function",
+		"[[DontDelete]]": false
+	}));
+	
+	//ES3 15.4: Array Objects
+	var _Array = extend(CreateFunction("Array", "*"), {
+		identifier: "Array",
+		value: {},
+	
 		"[[DontDelete]]": false
 	});
 }
