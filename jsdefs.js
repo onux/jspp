@@ -102,7 +102,7 @@
         "debugger", "default", "delete", "do",
         "else", "enum", "extends", "extension",
         "false", "finally", "for", "function",
-        "if", "in", "inside", "instanceof",
+        "if", "in", "inside", "instanceof", "is",
         "new", "null",
         "private", "protected", "public",
         "return",

@@ -1926,7 +1926,8 @@ compiler.prototype.compile = function (ast) {
 												 "__PROTECTED__." + findIdentifier);
 									}
 									else {
-										out.push(findIdentifier);
+										out.push(find.data["[[MemberOf]]"] + "." + 
+												 findIdentifier);
 									}
 								}
 								else if (find.data["[[Public]]"]) {
@@ -2080,6 +2081,12 @@ compiler.prototype.compile = function (ast) {
 					type: ReferenceError,
 					message: "Invalid left-hand assignment"
 				}, ast);
+			}
+			
+			//TODO: If it's the dot operator or index, assign the property
+			if (ast[0].type == jsdef.DOT) {
+			}
+			else if (ast[0].type == jsdef.INDEX) {
 			}
 			
 			var id = generate(ast[0]);
@@ -2344,7 +2351,7 @@ compiler.prototype.compile = function (ast) {
 				out.push('"');
 			}
 			else {
-			out.push('"' + ast.value + '"');
+				out.push('"' + ast.value + '"');
 				//out.push(JSON.stringify(ast.value.replace(/\\\r?\n/gm, "\n").replace(/\\(.)/gm, "$1")));
 			}
 			break;
@@ -2545,7 +2552,7 @@ compiler.prototype.compile = function (ast) {
 						}
 						else {
 							this.NewError({
-								type: SyntaxError,
+								type: RangeError,
 								message: "Invalid range"
 							}, ast);
 						}
@@ -2556,7 +2563,7 @@ compiler.prototype.compile = function (ast) {
 						}
 						else {
 							this.NewError({
-								type: SyntaxError,
+								type: RangeError,
 								message: "Invalid range"
 							}, ast);
 						}
@@ -2568,7 +2575,7 @@ compiler.prototype.compile = function (ast) {
 						}
 						else {
 							this.NewError({
-								type: SyntaxError,
+								type: RangeError,
 								message: "Invalid range"
 							}, ast);
 						}
@@ -2579,7 +2586,7 @@ compiler.prototype.compile = function (ast) {
 						}
 						else {
 							this.NewError({
-								type: SyntaxError,
+								type: RangeError,
 								message: "Invalid range"
 							}, ast);
 						}
@@ -2604,14 +2611,14 @@ compiler.prototype.compile = function (ast) {
 					}
 					else {
 						this.NewError({
-							type: SyntaxError,
+							type: RangeError,
 							message: "Invalid range"
 						}, ast);
 					}
 				}
 				else {
 					this.NewError({
-						type: SyntaxError,
+						type: RangeError,
 						message: "Invalid range"
 					}, ast);
 				}
@@ -2632,7 +2639,7 @@ compiler.prototype.compile = function (ast) {
 			break;
 		case jsdef.RANGE:
 			this.NewError({
-				type: SyntaxError,
+				type: RangeError,
 				message: "Invalid range"
 			}, ast);
 			break;

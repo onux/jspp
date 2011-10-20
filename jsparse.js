@@ -1082,7 +1082,7 @@
             BITWISE_XOR: 7,
             BITWISE_AND: 8,
             EQ: 9, NE: 9, STRICT_EQ: 9, STRICT_NE: 9,
-            LT: 10, LE: 10, GE: 10, GT: 10, IN: 10, INSIDE: 10, INSTANCEOF: 10,
+            LT: 10, LE: 10, GE: 10, GT: 10, IN: 10, INSIDE: 10, INSTANCEOF: 10, IS: 10,
             LSH: 11, RSH: 11, URSH: 11,
             PLUS: 12, MINUS: 12,
             MUL: 13, DIV: 13, MOD: 13, REGEXP_MATCH: 13,
@@ -1109,7 +1109,7 @@
             BITWISE_XOR: 2,
             BITWISE_AND: 2,
             EQ: 2, NE: 2, STRICT_EQ: 2, STRICT_NE: 2,
-            LT: 2, LE: 2, GE: 2, GT: 2, IN: 2, INSIDE: 2, INSTANCEOF: 2,
+            LT: 2, LE: 2, GE: 2, GT: 2, IN: 2, INSIDE: 2, INSTANCEOF: 2, IS: 2,
             LSH: 2, RSH: 2, URSH: 2,
             PLUS: 2, MINUS: 2,
             MUL: 2, DIV: 2, MOD: 2,
@@ -1220,7 +1220,7 @@
                 case jsdef.BITWISE_AND:
                 case jsdef.EQ: case jsdef.NE: case jsdef.STRICT_EQ: case jsdef.STRICT_NE:
                 case jsdef.LT: case jsdef.LE: case jsdef.GE: case jsdef.GT:
-                case jsdef.INSTANCEOF:
+                case jsdef.INSTANCEOF: case jsdef.IS:
                 case jsdef.LSH: case jsdef.RSH: case jsdef.URSH:
                 case jsdef.PLUS: case jsdef.MINUS:
                 case jsdef.MUL: case jsdef.DIV: case jsdef.MOD:
