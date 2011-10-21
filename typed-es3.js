@@ -130,8 +130,8 @@ function CreateGlobal(node) {
 	}
 	var fn_proto = CreateFunction("undefined"),
 		fn_toString = CreateFunction("String"),
-		fn_apply = CreateFunction("*", "Object", "Array"),
-		fn_call = CreateFunction("*", "Object", "...*");
+		fn_apply = CreateFunction("*", "Object", "Array!"),
+		fn_call = CreateFunction("*", "Object", "...*!");
 	fn_apply.apply = fn_call.apply = fn_proto.apply = fn_apply;
 	fn_apply.call = fn_call.call = fn_proto.call = fn_call;
 	
@@ -244,16 +244,420 @@ function CreateGlobal(node) {
 	//ES3 15.3: Function Objects
 	node.Variables.push(extend(CreateFunction("Function", "*"), {
 		identifier: "Function",
-		value: {},
+		value: function(){},
 	
 		"[[DontDelete]]": false
 	}));
+	//TODO: 15.3.5 Properties of Function Instances
 	
 	//ES3 15.4: Array Objects
 	var _Array = extend(CreateFunction("Array", "*"), {
 		identifier: "Array",
-		value: {},
+		value: [],
 	
 		"[[DontDelete]]": false
+	});
+	_Array.properties.prototype = {
+		"[[Prototype]]": obj,
+		"[[Type]]": "Object",
+		
+		properties: {
+			constructor: _Array,
+			toString: fn_toString,
+			toLocaleString: CreateFunction("String"),
+			concat: CreateFunction("Array", "...Array"),
+			join: CreateFunction("String", "String!"),
+			pop: CreateFunction("*"),
+			push: CreateFunction("Number", "...*"),
+			reverse: CreateFunction("Array"),
+			shift: CreateFunction("*"),
+			slice: CreateFunction("Array", "Number!", "Number!"),
+			sort: CreateFunction("Array", "Function!"),
+			splice: CreateFunction("Array", "Number", "Number", "...*"),
+			unshift: CreateFunction("Number", "*")
+		}
+	};
+	node.Variables.push(_Array);
+	//TODO: 15.4.5 Properties of Array Instances
+	
+	//ES3 15.5: String Objects
+	var _String = extend(CreateFunction("String", "*"), {
+		identifier: "String",
+		value: "",
+	
+		"[[DontDelete]]": false
+	});
+	_String.properties = extend(_String.properties, {
+		fromCharCode: CreateFunction("String", "Number", "...Number")
+	});
+	_String.properties.prototype = {
+		"[[Prototype]]": obj,
+		"[[Type]]": "Object",
+		
+		//TODO: all methods that return "Array" should be overloaded to return
+		//		"StringArray"
+		properties: {
+			constructor: _String,
+			toString: fn_toString,
+			valueOf: CreateFunction("String"),
+			charAt: CreateFunction("String", "Number"),
+			charCodeAt: CreateFunction("Number", "Number"),
+			concat: CreateFunction("String", "...String"),
+			indexOf: CreateFunction("Number", "String", "Number"),
+			lastIndexOf: CreateFunction("Number", "String", "Number"),
+			localeCompare: CreateFunction("Number", "String"),
+			match: CreateFunction("Array!", "RegExp"),
+			replace: CreateFunction("String", "RegExp", "Function"), //TODO: overload this func: CreateFunction("String", "RegExp", "String")
+			search: CreateFunction("Number", "RegExp"),
+			slice: CreateFunction("String", "Number!", "Number!"),
+			split: CreateFunction("Array", "String!", "Number!"), //TODO: overload this func: CreateFunction("Array", "RegExp", "Number!")
+			substring: CreateFunction("String", "Number", "Number!"),
+			toLowerCase: CreateFunction("String"),
+			toLocaleLowerCase: CreateFunction("String"),
+			toUpperCase: CreateFunction("String"),
+			toLocaleUpperCase: CreateFunction("String")
+		}
+	};
+	node.Variables.push(_String);
+	//TODO: 15.5.5 Properties of String Instances
+	
+	//ES3 15.6: Boolean Objects
+	var _Boolean = extend(CreateFunction("Boolean", "*"), {
+		identifier: "Boolean",
+		value: false,
+	
+		"[[DontDelete]]": false
+	});
+	_Boolean.properties.prototype = {
+		"[[Prototype]]": obj,
+		"[[Type]]": "Object",
+		
+		properties: {
+			constructor: _Boolean,
+			toString: fn_toString,
+			valueOf: CreateFunction("Boolean")
+		}
+	};
+	node.Variables.push(_Boolean);
+	
+	//ES3 15.7: Number Objects
+	var _Number = extend(CreateFunction("Number", "*"), {
+		identifier: "Number",
+		value: 0,
+	
+		"[[DontDelete]]": false
+	});
+	_Number.properties.prototype = {
+		"[[Prototype]]": obj,
+		"[[Type]]": "Object",
+		
+		properties: {
+			constructor: _Number,
+			toString: fn_toString,
+			toLocaleString: CreateFunction("String"),
+			valueOf: CreateFunction("Number"),
+			toFixed: CreateFunction("String", "Number"),
+			toExponential: CreateFunction("String", "Number"),
+			toPrecision: CreateFunction("String", "Number")
+		}
+	};
+	_Number.properties = extend(_Number.properties, {
+		MAX_VALUE: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": obj,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		MIN_VALUE: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": obj,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		NaN: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": obj,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		NEGATIVE_INFINITY: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": obj,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		POSITIVE_INFINITY: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": obj,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		}
+	});
+	node.Variables.push(_Number);
+	
+	//ES3 15.8: The Math Object
+	var _Math = extend(CreateObject(), {
+		identifier: "Math",
+		
+		"[[Prototype]]": obj
+	});
+	var _MathCtor = _Math.properties.constructor;
+	_Math.properties = {
+		constructor: _MathCtor,
+		
+		E: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": _Number.properties.prototype,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		LN10: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": _Number.properties.prototype,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		LN2: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": _Number.properties.prototype,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		LOG2E: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": _Number.properties.prototype,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		LOG10E: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": _Number.properties.prototype,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		PI: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": _Number.properties.prototype,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		SQRT1_2: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": _Number.properties.prototype,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		SQRT2: {
+			"[[Type]]": "Number",
+			"[[Prototype]]": _Number.properties.prototype,
+			
+			"[[DontEnum]]": true,
+			"[[DontDelete]]": true,
+			"[[ReadOnly]]": true
+		},
+		
+		abs: CreateFunction("Number", "Number"),
+		acos: CreateFunction("Number", "Number"),
+		asin: CreateFunction("Number", "Number"),
+		atan: CreateFunction("Number", "Number"),
+		atan2: CreateFunction("Number", "Number", "Number"),
+		ceil: CreateFunction("Number", "Number"),
+		cos: CreateFunction("Number", "Number"),
+		exp: CreateFunction("Number", "Number"),
+		floor: CreateFunction("Number", "Number"),
+		log: CreateFunction("Number", "Number"),
+		max: CreateFunction("Number", "...Number"),
+		min: CreateFunction("Number", "...Number"),
+		pow: CreateFunction("Number", "Number", "Number"),
+		random: CreateFunction("Number"),
+		round: CreateFunction("Number", "Number"),
+		sin: CreateFunction("Number", "Number"),
+		sqrt: CreateFunction("Number", "Number"),
+		tan: CreateFunction("Number", "Number")
+	};
+	node.Variables.push(_Math);
+	
+	//ES3 15.9: Date Objects
+	var _Date = extend(CreateFunction("Date", "Number!", "Number!", "Number!",
+									  "Number!", "Number!", "Number!", "Number!"), {
+		identifier: "Date",
+		value: 0,
+	
+		"[[DontDelete]]": false
+	});
+	_Date.properties = extend(_Date.properties, {
+		parse: CreateFunction("Number", "String"),
+		UTC: CreateFunction("Number", "Number", "Number", "Number!", "Number!",
+							"Number!", "Number!", "Number!")
+	});
+	_Date.properties.prototype = {
+		"[[Prototype]]": obj,
+		"[[Type]]": "Object",
+		
+		"[[DontDelete]]": true,
+		"[[DontEnum]]": true,
+		"[[ReadOnly]]": true,
+		
+		properties: {
+			constructor: _Date,
+			toString: fn_toString,
+			toDateString: CreateFunction("String"),
+			toTimeString: CreateFunction("String"),
+			toLocaleString: CreateFunction("String"),
+			toLocaleDateString: CreateFunction("String"),
+			toLocaleTimeString: CreateFunction("String"),
+			toLocaleString: CreateFunction("String"),
+			valueOf: CreateFunction("Number"),
+			
+			getTime: CreateFunction("Number"),
+			getFullYear: CreateFunction("Number"),
+			getUTCFullYear: CreateFunction("Number"),
+			getMonth: CreateFunction("Number"),
+			getUTCMonth: CreateFunction("Number"),
+			getDate: CreateFunction("Number"),
+			getUTCDate: CreateFunction("Number"),
+			getDay: CreateFunction("Number"),
+			getUTCDay: CreateFunction("Number"),
+			getHours: CreateFunction("Number"),
+			getUTCHours: CreateFunction("Number"),
+			getMinutes: CreateFunction("Number"),
+			getUTCMinutes: CreateFunction("Number"),
+			getSeconds: CreateFunction("Number"),
+			getUTCSeconds: CreateFunction("Number"),
+			getMilliseconds: CreateFunction("Number"),
+			getUTCMilliseconds: CreateFunction("Number"),
+			getTimezoneOffset: CreateFunction("Number"),
+			
+			setTime: CreateFunction("Number", "Number"),
+			setMilliseconds: CreateFunction("Number", "Number"),
+			setUTCMilliseconds: CreateFunction("Number", "Number"),
+			setSeconds: CreateFunction("Number", "Number", "Number!"),
+			setUTCSeconds: CreateFunction("Number", "Number", "Number!"),
+			setMinutes: CreateFunction("Number", "Number", "Number!", "Number!"),
+			setUTCMinutes: CreateFunction("Number", "Number", "Number!", "Number!"),
+			setHours: CreateFunction("Number", "Number", "Number!", "Number!", "Number!"),
+			setUTCHours: CreateFunction("Number", "Number", "Number!", "Number!", "Number!"),
+			setDate: CreateFunction("Number", "Number"),
+			setUTCDate: CreateFunction("Number", "Number"),
+			setMonth: CreateFunction("Number", "Number", "Number!"),
+			setUTCMonth: CreateFunction("Number", "Number", "Number!"),
+			setFullYear: CreateFunction("Number", "Number", "Number!", "Number!"),
+			setUTCFullYear: CreateFunction("Number", "Number", "Number!", "Number!"),
+			
+			toUTCString: CreateFunction("String"),
+		}
+	};
+	node.Variables.push(_Date);
+	
+	//ES3 15.10: RegExp (Regular Expression) Objects
+	var _RegExp = extend(CreateFunction("RegExp", "*", "String!"), {
+		identifier: "RegExp",
+		value: 0,
+	
+		"[[DontDelete]]": false
+	});
+	_RegExp.properties.prototype = {
+		"[[Prototype]]": obj,
+		"[[Type]]": "Object",
+		
+		"[[DontDelete]]": true,
+		"[[DontEnum]]": true,
+		"[[ReadOnly]]": true,
+		
+		properties: {
+			constructor: _RegExp,
+			exec: CreateFunction("Array!", "String"),
+			test: CreateFunction("Boolean", "String"),
+			toString: fn_toString
+		}
+	};
+	node.Variables.push(_RegExp);
+	//TODO: 15.10.7 Properties of RegExp Instances
+	
+	//ES3 15.11: Error Objects
+	var _Error = extend(CreateFunction("Error", "String!"), {
+		identifier: "Error",
+	
+		"[[DontDelete]]": false
+	});
+	_Error.properties.prototype = {
+		"[[Prototype]]": obj,
+		"[[Type]]": "Object",
+		
+		"[[DontDelete]]": true,
+		"[[DontEnum]]": true,
+		"[[ReadOnly]]": true,
+		
+		properties: {
+			constructor: _Error,
+			name: {
+				"[[Type]]": "String",
+				"[[Prototype]]": _String.properties.prototype
+			},
+			message: {
+				"[[Type]]": "String",
+				"[[Prototype]]": _String.properties.prototype
+			},
+			toString: fn_toString
+		}
+	};
+	node.Variables.push(_Error);
+	node.Variables.push(extend(_Error, {
+		identifier: "EvalError"
+	}));
+	node.Variables.push(extend(_Error, {
+		identifier: "RangeError"
+	}));
+	node.Variables.push(extend(_Error, {
+		identifier: "ReferenceError"
+	}));
+	node.Variables.push(extend(_Error, {
+		identifier: "SyntaxError"
+	}));
+	node.Variables.push(extend(_Error, {
+		identifier: "TypeError"
+	}));
+	node.Variables.push(extend(_Error, {
+		identifier: "URIError"
+	}));
+	
+	//ES3 Appendix B.2: Additional Properties
+	node.Variables.push(extend(CreateFunction("String", "String"), {
+		identifier: "escape"
+	}));
+	node.Variables.push(extend(CreateFunction("String", "String"), {
+		identifier: "unescape"
+	}));
+	_String.properties.prototype.properties = extend(_String.properties.prototype.properties, {
+		substr: CreateFunction("String", "Number", "Number!")
+	});
+	_Date.properties.prototype.properties = extend(_Date.properties.prototype.properties, {
+		getYear: CreateFunction("Number"),
+		setYear: CreateFunction("Number", "Number"),
+		toGMTString: CreateFunction("String")
 	});
 }
