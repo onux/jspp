@@ -242,7 +242,8 @@ function CreateGlobal(node) {
 	node.Variables.push(_Object);
 	
 	//ES3 15.3: Function Objects
-	node.Variables.push(extend(CreateFunction("Function", "*"), {
+	var _Function;
+	node.Variables.push(_Function = extend(CreateFunction("Function", "*"), {
 		identifier: "Function",
 		value: function(){},
 	
@@ -626,22 +627,25 @@ function CreateGlobal(node) {
 		}
 	};
 	node.Variables.push(_Error);
-	node.Variables.push(extend(_Error, {
+	
+	var _EvalError, _RangeError, _ReferenceError, _SyntaxError, _TypeError, _URIError;
+	
+	node.Variables.push(_EvalError = extend(_Error, {
 		identifier: "EvalError"
 	}));
-	node.Variables.push(extend(_Error, {
+	node.Variables.push(_RangeError = extend(_Error, {
 		identifier: "RangeError"
 	}));
-	node.Variables.push(extend(_Error, {
+	node.Variables.push(_ReferenceError = extend(_Error, {
 		identifier: "ReferenceError"
 	}));
-	node.Variables.push(extend(_Error, {
+	node.Variables.push(_SyntaxError = extend(_Error, {
 		identifier: "SyntaxError"
 	}));
-	node.Variables.push(extend(_Error, {
+	node.Variables.push(_TypeError = extend(_Error, {
 		identifier: "TypeError"
 	}));
-	node.Variables.push(extend(_Error, {
+	node.Variables.push(_URIError = extend(_Error, {
 		identifier: "URIError"
 	}));
 	
@@ -660,4 +664,22 @@ function CreateGlobal(node) {
 		setYear: CreateFunction("Number", "Number"),
 		toGMTString: CreateFunction("String")
 	});
+	
+	//Export
+	CreateGlobal.Object = _Object;
+	CreateGlobal.Function = _Function;
+	CreateGlobal.Array = _Array;
+	CreateGlobal.String = _String;
+	CreateGlobal.Boolean = _Boolean;
+	CreateGlobal.Number = _Number;
+	CreateGlobal.Math = _Math;
+	CreateGlobal.Date = _Date;
+	CreateGlobal.RegExp = _RegExp;
+	CreateGlobal.Error = _Error;
+	CreateGlobal.EvalError = _EvalError;
+	CreateGlobal.RangeError = _RangeError;
+	CreateGlobal.ReferenceError = _ReferenceError;
+	CreateGlobal.SyntaxError = _SyntaxError;
+	CreateGlobal.TypeError = _TypeError;
+	CreateGlobal.URIError = _URIError;
 }
