@@ -1,4 +1,4 @@
-Alpha 0.05
+Alpha 0.5
 --------
 * Fully typed ES3
 * #typesys strict will look up the prototype chain
