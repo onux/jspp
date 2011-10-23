@@ -380,6 +380,31 @@ function compiler(ast, options) {
 			"default": "[]"
 		}
 	};
+	//Return [[Prototype]] based on type
+	this.GetProto = function(s) {
+		if (typeof CreateGlobal != "function") return void 0;
+		switch(s) {
+			//Built-in objects
+			case "Array": return CreateGlobal.Array.properties.prototype;
+			case "Boolean": return CreateGlobal.Boolean.properties.prototype;
+			case "Date": return CreateGlobal.Date.properties.prototype;
+			case "Function": return CreateGlobal.Function.properties.prototype;
+			case "Number": return CreateGlobal.Number.properties.prototype;
+			case "Object": return CreateGlobal.Object.properties.prototype;
+			case "RegExp": return CreateGlobal.RegExp.properties.prototype;
+			case "String": return CreateGlobal.String.properties.prototype;
+			case "Error":
+			case "EvalError":
+			case "RangeError":
+			case "ReferenceError":
+			case "SyntaxError":
+			case "TypeError":
+			case "URIError":
+				return CreateGlobal.Error.properties.prototype;
+				
+			//TODO: Typed arrays
+		}
+	};
 	
 	this.currentLabel = ""; //Labels for loops
 	this.breakStmt = ""; //Track break statements
@@ -518,6 +543,7 @@ compiler.prototype.compile = function (ast) {
 					varObj = {
 						identifier: id = ast.params[i],
 						value: undefined,
+						properties: {},
 						
 						//Internal properties
 						"[[ReadOnly]]": false,
@@ -1170,6 +1196,7 @@ compiler.prototype.compile = function (ast) {
 			if (this.InsideClass()) {
 				this.CurrentClass().Variables.push({
 					identifier: ast.name,
+					properties: {},
 					
 					//Standard internal properties
 					"[[ReadOnly]]": false,
@@ -1578,11 +1605,14 @@ compiler.prototype.compile = function (ast) {
 				
 				varObject = {
 					identifier: id = ast[item].value,
+					properties: {},
 					
 					//Internal properties
 					"[[ReadOnly]]": false,
 					"[[DontEnum]]": false,
 					"[[DontDelete]]": true,
+					
+					"[[Prototype]]": this.GetProto(ast[item].vartype),
 					
 					//Non-standard
 					"[[Type]]": ast[item].vartype
@@ -1617,6 +1647,7 @@ compiler.prototype.compile = function (ast) {
 				if (insideClass) {
 					this.CurrentClass().Variables.push(varObject = {
 						identifier: id,
+						properties: {},
 					
 						//Standard internal properties
 						"[[ReadOnly]]": false,
@@ -1768,6 +1799,7 @@ compiler.prototype.compile = function (ast) {
 				
 				varObject = {
 					identifier: scope.map_BlockVars[oid] = id,
+					properties: {},
 					
 					//Internal properties
 					"[[ReadOnly]]": false,
@@ -2084,10 +2116,25 @@ compiler.prototype.compile = function (ast) {
 			}
 			
 			//TODO: If it's the dot operator or index, assign the property
-			if (ast[0].type == jsdef.DOT) {
+			scope = this.CurrentScope();
+			/*if (ast[0].type == jsdef.DOT) {
+				var find = ast[0][0].value;
+				for (var j=scope.Variables.length-1; j>=0; j--) {
+					if (!scope.Variables[j] || 
+						scope.Variables[j].identifier !== find) {
+						continue;
+					}
+					
+					scope.Variables[j].properties[generate(ast[0][1])] = {
+						properties: {},
+						identifier: ast[0][1].value
+					};
+					break;
+				}
+				break;
 			}
 			else if (ast[0].type == jsdef.INDEX) {
-			}
+			}*/
 			
 			var id = generate(ast[0]);
 			out.push(id);
@@ -2702,14 +2749,85 @@ compiler.prototype.compile = function (ast) {
 		case jsdef.OBJECT_INIT:
 			this.TypeCheck(ast);
 			
-			out.push("{");
+			scope = this.CurrentScope();
+			
+			out.push("{");			
 			for (var item in ast) {
 				if (!isFinite(item)) continue;
 				
+				var find, props, propsChain = [ast[item][0].value], currentProp, vartype;
+				
+				//Do the code generation before we add type annotations into
+				//Variables object because the PROPERTY_INIT will trigger
+				//the type system which resolves the type of each property
 				if (ast.parentProperty) ast[item].parentProperty = ast.parentProperty;
 				else ast[item].parentObject = ast;
 				
 				out.push(generate(ast[item]));
+				
+				vartype = ast[item][1]["[[Type]]"];
+				
+				if (ast.parentProperty) {
+					find = ast.parentProperty;
+					propsChain.push(find[0].value);
+					
+					while (find && (find.parentProperty || find.parentObject)) {
+						if (find.parentProperty) {
+							find = find.parentProperty;
+							propsChain.push(find[0].value);
+						}
+						else {
+							find = find.parentObject;
+							break;
+						}
+					}
+					
+					find = find.assignedTo;
+				}else {
+					find = ast.assignedTo;
+				}
+				
+				//Now that we know the property type, loop through Variables object
+				for (var j=scope.Variables.length-1; j>=0; j--) {
+					if (!scope.Variables[j] || 
+						scope.Variables[j].identifier !== find) {
+						continue;
+					}
+					
+					props = scope.Variables[j].properties;
+					
+					while(propsChain.length) {
+						currentProp = propsChain.pop();
+						
+						if (props[currentProp]) {
+							//This is a bit of a hack, but at least the [[Type]]
+							//property will be set correctly
+							props[currentProp]["[[Type]]"] = vartype;
+							props[currentProp]["[[Prototype]]"] = this.GetProto(vartype);
+						}
+						else {
+							props[currentProp] = props[currentProp] || {
+								"[[Type]]": vartype,
+								"[[Prototype]]": this.GetProto(vartype),
+						
+								properties: {}
+							};
+							
+							if (vartype == "Function") {
+								props[currentProp].properties.prototype = {
+									"[[Type]]": "Object",
+									"[[Prototype]]": this.GetProto("Object"),
+									
+									properties: {}
+								};
+							}
+						}
+					
+						props = props[currentProp].properties;
+					}
+					
+					break;
+				}
 				
 				out.push(",");
 			}
