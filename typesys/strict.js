@@ -219,6 +219,107 @@ compiler.prototype.typesys.strict = function() {
 			}
 		});
 	}
+	
+	//Internal function to look up prototype chain for an arbitrary property
+	function lookupProto(node, property) {
+		var hasOwn = Object.prototype.hasOwnProperty;
+		while(node) {
+			if (node.properties && hasOwn.call(node.properties, property)) {
+				return node.properties[property];
+			}
+			
+			if (node["[[Prototype]]"]) node = node["[[Prototype]]"];
+		}
+	}
+	
+	//Reduces chained dot and index property accessors to a single value
+	function _reduceProps(node, Compiler) {
+		var out = [];
+		
+		switch (node[0].type) {
+			//Most common first
+			case jsdef.IDENTIFIER:
+			case jsdef.TRUE: case jsdef.FALSE: case jsdef.NULL:
+				out.push(node[0].value);
+				break;
+			case jsdef.GROUP:
+			case jsdef.DOT:
+			case jsdef.INDEX:
+				out = out.concat(_reduceProps(node[0], Compiler));
+				break;
+				
+			case jsdef.ARRAY_INIT:
+				out.push("Array");
+				out.push("prototype");
+				break;
+			case jsdef.OBJECT_INIT:
+				out.push("Object");
+				out.push("prototype");
+				break;
+			case jsdef.BOOLEAN:
+				out.push("Boolean");
+				out.push("prototype");
+				break;
+			case jsdef.FUNCTION:
+				out.push("Function");
+				out.push("prototype");
+				break;
+			case jsdef.NUMBER:
+				out.push("Number");
+				out.push("prototype");
+				break;
+			case jsdef.REGEXP:
+				out.push("RegExp");
+				out.push("prototype");
+				break;
+			case jsdef.STRING:
+				out.push("String");
+				out.push("prototype");
+				break;
+				
+			//Otherwise, throw an error
+			default:
+				Compiler.NewError({
+					type: SyntaxError,
+					message: "Illegal operation on dot accessor with #typesys strict"
+				}, Node);
+				break;
+		}
+					
+		if (node.type == jsdef.DOT) {
+			out.push(node[1].value);
+		}
+		else if (node.type == jsdef.INDEX) {
+			switch (node[1].type) {
+				//Don't allow dynamic property assignments without dicts
+				case jsdef.IDENTIFIER:
+					//use [false, identifier] to identify dynamic properties
+					//all other properties are strings
+					out.push([false, node[1].value]);
+					break;
+					
+				case jsdef.TRUE: case jsdef.FALSE: case jsdef.NULL:
+				case jsdef.STRING:
+				case jsdef.NUMBER:
+					out.push(node[1].value);
+					break;
+					
+				case jsdef.VOID:
+					out.push("undefined");
+					break;
+					
+				//Otherwise, throw an error
+				default:
+					Compiler.NewError({
+						type: SyntaxError,
+						message: "Illegal index operation with #typesys strict"
+					}, Node);
+					break;
+			}
+		}
+		
+		return out;
+	}
 
 	this.typesys = function(Node, Compiler) {
 		var _this = this;
@@ -227,6 +328,10 @@ compiler.prototype.typesys.strict = function() {
 		function resolve(id, callback, isDeclaration) {
 			_resolve(id, Node, Compiler, callback, isDeclaration);
 		}
+		//Partial application of _reduceProps function
+		function reduceProps(node){ return _reduceProps(node, Compiler) }
+		//Partial application of _reduceIndex function
+		function reduceIndex(node){ return _reduceIndex(node, Compiler) }
 		
 		switch(Node.type) {
 			case jsdef.FUNCTION:
@@ -281,10 +386,10 @@ compiler.prototype.typesys.strict = function() {
 							var Variables;
 							resolve(Node[item].value, function(data, fullData) {
 								if (!fullData) return;
-								
+							
 								Variables = Compiler.scopes[fullData.scopeId].Variables;
 							}, true);
-							
+						
 							if (Variables) for (var i=0, len=Variables.length; i<len; i++) {
 								if (Variables[i].identifier == Node[item].value) {
 									Variables[i]["[[Type]]"] = Node[item].vartype;
@@ -360,7 +465,7 @@ compiler.prototype.typesys.strict = function() {
 				}
 				
 				//For object properties, we do type inference to keep the syntax terse
-				resolve(nodeParent, function(data) {
+				resolve(nodeParent, function(data, fullData) {
 					var getProps = data.value;
 					for (var item in getProps) {
 						if (!isFinite(item)) continue;
@@ -369,7 +474,6 @@ compiler.prototype.typesys.strict = function() {
 							if (getProps[item][0].value == Node[0].value) {
 								getProps[item][1]["[[Type]]"] =
 									_this.typesys(getProps[item][1], Compiler);
-								break;
 							}
 						}
 						//Recursive descent to find nested object propreties
@@ -392,7 +496,6 @@ compiler.prototype.typesys.strict = function() {
 							})(getProps[item][1]);
 							
 							Property[1]["[[Type]]"] = _this.typesys(Property[1], Compiler);
-							break;
 						}
 					}
 				});
@@ -895,10 +998,84 @@ compiler.prototype.typesys.strict = function() {
 						}, Node);
 					}
 				}
-				//TODO: toString, toLowerCase, toUpperCase
+				//Dot accessor
 				else if (Node[0].type == jsdef.DOT) {
+					var reduced = reduceProps(Node), _type;
+				
+					if (!reduced || (reduced && !reduced.length)) break;
+				
+					resolve(reduced[0], function(data) {
+						var hasOwn = Object.prototype.hasOwnProperty,
+							_data = data, prop;
+					
+						for (var i=1, len=reduced.length; i<len; i++) {
+							//First look up properties of object
+							if (_data.properties) {
+								if (hasOwn.call(_data.properties, reduced[i])) {
+									if (i == reduced.length - 1) {
+										prop = _data.properties[reduced[i]];
+										
+										_type = prop.type == jsdef.FUNCTION ?
+											prop.returntype : prop["[[Type]]"];
+									}
+									else {
+										_data = _data.properties[reduced[i]];
+										continue;
+									}
+								}
+							}
+						
+							//After we've looked up direct properties, look up
+							//prototype chain
+							if (_data["[[Prototype]]"]) {
+								_data = _data["[[Prototype]]"];
+								i--;
+								continue;
+							}
+						}
+					});
+					
+					return _type;
 				}
 				break;
+				
+			//Properties
+			case jsdef.DOT:
+			case jsdef.INDEX:
+				var reduced = reduceProps(Node), _type;
+				
+				if (!reduced || (reduced && !reduced.length)) break;
+				
+				resolve(reduced[0], function(data) {
+					var hasOwn = Object.prototype.hasOwnProperty,
+						_data = data;
+					
+					//TODO: handle dynamic properties
+					for (var i=1, len=reduced.length; i<len; i++) {
+						//First look up properties of object
+						if (_data.properties) {
+							if (hasOwn.call(_data.properties, reduced[i])) {
+								if (i == reduced.length - 1) {
+									_type = _data.properties[reduced[i]]["[[Type]]"];
+								}
+								else {
+									_data = _data.properties[reduced[i]];
+									continue;
+								}
+							}
+						}
+						
+						//After we've looked up direct properties, look up
+						//prototype chain
+						if (_data["[[Prototype]]"]) {
+							_data = _data["[[Prototype]]"];
+							i--;
+							continue;
+						}
+					}
+				});
+				
+				return _type;
 				
 			//Miscellaneous expression tokens
 			case jsdef.GROUP:
@@ -908,6 +1085,8 @@ compiler.prototype.typesys.strict = function() {
 			case jsdef.NEW:
 				//TODO: new Class() should return the class
 				return "Object";
+			case jsdef.NEW_WITH_ARGS:
+				break;
 			case jsdef.HOOK:
 				var type1 = _this.typesys(Node[1], Compiler),
 					type2 = _this.typesys(Node[2], Compiler);
