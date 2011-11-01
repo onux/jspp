@@ -1,7 +1,9 @@
-Alpha 0.12
+10/25/11 - Alpha 0.12
 --------
 * Fully typed ES3
+* #typesys strict will look up properties
 * #typesys strict will look up the prototype chain
+* #typesys strict is compatible with typed ES3
 * Property assignments are saved by compiler
 * Started parsing nullable types, "is" keyword
 * Bug fixes to #typesys strict and classes

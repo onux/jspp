@@ -1322,7 +1322,10 @@ compiler.prototype.compile = function (ast) {
 			if (ast.setup && ast.setup.type == jsdef.LET) {
 				out.push(setupFor + this.currentLabel + "for(;");
 			}else {
-				out.push(this.currentLabel + "for(" + setupFor);
+				out.push(
+						 this.currentLabel + "for(" + setupFor +
+						 (setupFor.slice(-1) == ";" ? "": ";")
+						);
 			}
 			out.push((ast.condition ? generate(ast.condition) : "") + ";");
 			out.push((ast.update ? generate(ast.update) : "") + ")");
