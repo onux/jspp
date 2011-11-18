@@ -389,6 +389,25 @@ var foo = new class {};
 
 new foo;
 </code>
+<code class="eval">
+class foo {
+	public var b = true;
+
+	public function fooMethod() {
+		return this.b;
+	}
+}
+
+class bar {
+	public function barMethod(method) {
+		return method();
+	}
+}
+
+var a = new foo();
+var b = new bar();
+b.barMethod(a.fooMethod);
+</code>
 
 <button onclick="Start()">Start</button>
 
@@ -493,6 +512,7 @@ test("Method Overloading", function() {
 
 test("Miscellaneous", function() {
 	raises(Function(code[i++]), TypeError, "Singleton cannot be instantiated");
+	equal(code[i++], true, "this keyword");
 });
 
 }

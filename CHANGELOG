@@ -1,3 +1,7 @@
+Alpha 0.13
+--------
+* Fixed "this" keyword to refer to current instance of a class
+
 10/25/11 - Alpha 0.12
 --------
 * Fully typed ES3

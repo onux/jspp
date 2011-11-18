@@ -413,6 +413,7 @@ function compiler(ast, options) {
 	
 	//Classes
 	this.currentClass = "";
+	this.classId = "";
 	this.classMembers = {};
 	this.classScopes = [];
 	this.classes = {};
@@ -822,7 +823,7 @@ compiler.prototype.compile = function (ast) {
 			
 			//Store protected variables, regular "var" declarations don't
 			//work for nested classes
-			var classId = "__CLASS" + ast.body.scopeId + "__";
+			var classId = this.classId = "__CLASS" + ast.body.scopeId + "__";
 			out.push("var " + classId + "=this,");
 			//Don't use "Object" to avoid identifier lookup
 			out.push("__PDEFINE__={}.constructor.defineProperty,");
@@ -2430,7 +2431,12 @@ compiler.prototype.compile = function (ast) {
 		
 		//Miscellaneous
 		case jsdef.THIS:
-			out.push("this");
+			if (this.currentClass) {
+				out.push(this.classId);
+			}
+			else {
+				out.push("this");
+			}
 			break;
 		case jsdef.HOOK: //Ternary
 			out.push(generate(ast[0]));
