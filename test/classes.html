@@ -448,6 +448,8 @@ test("Basic Requirements", function() {
 	equal(code[i++], true, "(class {...})() calls constructor");
 	ok(code[i++], "Variable Declarations - var");
 	ok(code[i++], "Function Declarations");
+	
+	delete bar; //hack to deal with global scope
 });
 
 test("Static and Instance Members", function() {
