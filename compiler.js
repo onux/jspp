@@ -323,6 +323,22 @@ function compiler(ast, options) {
 		}
 	};
 	
+	//Reduce functions
+	this.reduceVarInit = function(node) {
+		switch(node.type) {
+			case jsdef.GROUP:
+			case jsdef.CALL:
+				return this.reduceVarInit(node[0]);
+			case jsdef.COMMA:
+				return this.reduceVarInit(node[node.length-1]);
+			case jsdef.OBJECT_INIT:
+			case jsdef.FUNCTION:
+				return node;
+			default:
+				break;
+		}
+	};
+	
 	//Types
 	//Define default values
 	this.types = {
@@ -1111,7 +1127,12 @@ compiler.prototype.compile = function (ast) {
 				}
 				
 				if (ast.private) {
-					out.push("var " + ast.name + "=function(");
+					if (!ast.reduced) {
+						out.push("var " + ast.name + "=function(");
+					}
+					else {
+						out.push("function(");
+					}
 				}
 				else if (ast.protected) {
 					out.push("this.__PROTECTED__." + ast.name + "=function(");
@@ -1128,7 +1149,12 @@ compiler.prototype.compile = function (ast) {
 					}, ast);
 				}
 				
-				out.push("var " + ast.name + "=function(");
+				if (!ast.reduced) {
+					out.push("var " + ast.name + "=function(");
+				}
+				else {
+					out.push("function(");
+				}
 			}
 			else if (ast.protected) {
 				if (!ast.name) {
@@ -1191,7 +1217,10 @@ compiler.prototype.compile = function (ast) {
 			}
 			
 			out.push("}");
-			if (ast.public || ast.private || ast.static || ast.protected) out.push(";");
+			if (!ast.reduced &&
+				(ast.public || ast.private || ast.static || ast.protected)) {
+				out.push(";");
+			}
 			
 			//Are we inside a class?
 			if (this.InsideClass()) {
@@ -1692,7 +1721,7 @@ compiler.prototype.compile = function (ast) {
 				out.push(currentId = varList[i].identifier);
 				
 				if ("value" in varList[i]) {
-					if (varList[i].value && varList[i].value.name === undefined) {
+					if (varList[i].value && varList[i].value.name === void 0) {
 						
 						//If it's a "class expression" (e.g. var foo = class {})
 						//we need to assign the anonymous class a name
@@ -1702,6 +1731,18 @@ compiler.prototype.compile = function (ast) {
 							varList[i].value.nestedParent = this.CurrentClass();
 							
 							varList[i].value.static = ast.static;
+						}
+						
+						//Handle nested groups and calls for class var inits
+						if (varList[i].value.type == jsdef.GROUP ||
+							varList[i].value.type == jsdef.CALL) {
+							//The following code will fix:
+							//  private var foo = (function(){})()
+							//and prevents it from becoming:
+							//  (var undefined = ...)
+							var reducedNode = this.reduceVarInit(varList[i].value);
+							reducedNode.name = varList[i].identifier;
+							reducedNode.reduced = true;
 						}
 						
 						//Remove access modifiers so:
