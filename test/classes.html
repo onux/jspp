@@ -278,10 +278,8 @@ class bar : foo {
 }
 </code>
 <code class="eval">
-//Commenting this out because qUnit fails tests that should otherwise pass
-//if this one fails - this happens for a few other tests we've excluded as well
-/*class foo {
-	public var bar = true;
+class foo {
+	public function bar(){ return true }
 }
 class bar : foo {
 	public var baz = super.bar;
@@ -290,7 +288,7 @@ class bar : foo {
 		return baz;
 	}
 }
-new foo*/
+(new bar)()
 </code>
 <code class="eval">
 class foo {

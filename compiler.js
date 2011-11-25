@@ -1741,8 +1741,11 @@ compiler.prototype.compile = function (ast) {
 							//and prevents it from becoming:
 							//  (var undefined = ...)
 							var reducedNode = this.reduceVarInit(varList[i].value);
-							reducedNode.name = varList[i].identifier;
-							reducedNode.reduced = true;
+							
+							if (reducedNode) {
+								reducedNode.name = varList[i].identifier;
+								reducedNode.reduced = true;
+							}
 						}
 						
 						//Remove access modifiers so:

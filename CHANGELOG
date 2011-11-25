@@ -1,6 +1,8 @@
 Alpha 0.13
 --------
 * Fixed "this" keyword to refer to current instance of a class
+* "super" keyword and related tests are now working
+* Bug fixes
 
 10/25/11 - Alpha 0.12
 --------
