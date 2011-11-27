@@ -64,6 +64,19 @@ class foo {
 	public function bar(){}
 }
 </code>
+<code class="eval">
+class foo {
+	public var baz = function() {
+		return bar();
+	};
+	
+	public function bar() {
+		return true;
+	}
+}
+
+(new foo).baz()
+</code>
 
 <!--
 #######################STATIC AND INSTANCE MEMBERS#######################
@@ -678,6 +691,19 @@ class foo {
 
 (new foo).baz
 </code>
+<code class="eval">
+class foo {
+	public function bar() {
+		return true;
+	}
+
+	public var baz = function() {
+		return bar();
+	};
+}
+
+(new foo).baz()
+</code>
 
 <button onclick="Start()">Start</button>
 
@@ -705,9 +731,7 @@ function Start() { //Problems with race conditions with qUnit, so wrap in functi
 
 var i = 0;
 
-test("Basic Requirements", function() {
-	expect(10);
-	
+test("Basic Requirements", function() {	
 	ok(code[i++], "Class Declaration");
 	ok(code[i++], "Class Expression");
 	ok(code[i++], "Anonymous Classes");
@@ -718,13 +742,12 @@ test("Basic Requirements", function() {
 	equal(code[i++], true, "(class {...})() calls constructor");
 	ok(code[i++], "Variable Declarations - var");
 	ok(code[i++], "Function Declarations");
+	equal(code[i++], true, "Function declarations (resolves even if declaration comes later)");
 	
 	delete bar; //hack to deal with global scope
 });
 
 test("Static and Instance Members", function() {
-	expect(9);
-	
 	ok(code[i++], "static Keyword");
 	equal(code[i++], true, "Static variables");
 	equal(code[i++], true, "Static methods");
@@ -766,8 +789,6 @@ test("Super", function() {
 });
 
 test("Constructors / Destructors", function() {
-	expect(6);
-	
 	ok(code[i++], "Constructor");
 	ok(code[i++], "Destructor");
 	
@@ -814,6 +835,7 @@ test("Miscellaneous", function() {
 	equal(code[i++], true, "Self-executing function assigned to static variable with comma operator (private static)");
 	equal(code[i++], true, "Self-executing function assigned to static variable with comma operator (public static)");
 	equal(code[i++], true, "Self-executing function assigned to static variable with comma operator (protected static)");
+	equal(code[i++], true, "Function expression can call function declaration inside class without this keyword");
 });
 
 }

@@ -1,6 +1,7 @@
 Alpha 0.13
 --------
 * Fixed "this" keyword to refer to current instance of a class
+* Fixed class method declarations - behaves like JS function declarations now
 * "super" keyword and related tests are now working
 * Bug fixes
 

@@ -808,7 +808,7 @@ compiler.prototype.compile = function (ast) {
 			out.push("function " + (ast.name || "") + "(){");
 			out.push("var __SUPER__;");
 			
-			if (ast.nestedParent) {					
+			if (ast.nestedParent) {
 				//Static class expressions
 				if (ast.classForm && ast.static) {
 					/*out.push("var __CLASS" + ast.nestedParent.body.scopeId + 
@@ -851,8 +851,70 @@ compiler.prototype.compile = function (ast) {
 			out.push("this.__PROTECTED__={};");
 			out.push("__PDEFINE__&&__PDEFINE__(this,'__PROTECTED__',__NOENUM__);");
 			
+			//Push methods - we do this separately in case of overloading
+			//Methods should come first to make class method declarations behave
+			//like JS function declarations
+			var _out, staticItems = [];
+			for (var i in methods) {
+				//Method is not overloaded, just push it
+				if (methods[i].length == 1) {
+					this.classVars.push(methods[i][0]);
+					
+					_out = methods[i][0].static ?
+						((methods[i][0].body.static = true), staticItems) : out;
+					_out.push(generate(methods[i].shift()));
+					
+					this.classVars.pop();
+				}
+				//Overloaded method
+				else {
+					//TODO: method overloading
+					/*_out.push("function " + methods[i][0].name + "(){");
+					var firstVar = true;
+					for (var j=0,_len=methods[i].length;j<_len;j++) {
+						_out = methods[i][j].static ? staticItems : out;
+						if (methods[i][j].params.length) {
+							_out.push("if(arguments.length==");
+							_out.push(methods[i][j].params.length + ") {");
+							_out.push("var ");
+							for (var k=0,__len=methods[i][j].paramsList.length;k<__len;k++) {
+								if (!firstVar) _out.push(",");
+							
+								_out.push(methods[i][j].paramsList[k].value);
+							
+								if (methods[i][j].paramsList[k].initializer) {
+									_out.push("=arguments[" + k + "]!==undefined?" + 
+										"arguments[" + k + "]:" +
+										generate(methods[i][j].paramsList[k].initializer));
+								}
+								else {
+									_out.push("=arguments[" + k + "]!==undefined?" + 
+										"arguments[" + k + "]" + 
+										":undefined");
+								}
+							
+								_out.push(";");
+								_out.push(generate(methods[i][j].body));
+								_out.push(this.currentScope + "=null;");
+								_out.push("}");
+							
+								firstVar = false;
+							}
+							firstVar = true;
+						}
+						else {
+							_out.push("if(!arguments.length){");
+							_out.push(generate(methods[i][j].body));
+							_out.push(this.currentScope + "=null;");
+							_out.push("}");
+						}
+					}
+					_out.push("}");*/
+				}
+			}
+			
 			//Class body
-			var currentClassItem, currentVar, staticItems = [];
+			var currentClassItem, currentVar;
 			for (var i=0, len=classItems.length; i<len; i++) {
 				if (classItems[i].type == jsdef.VAR) {
 					for (var varObject in classItems[i]) {
@@ -995,66 +1057,6 @@ compiler.prototype.compile = function (ast) {
 				out.push(generate(destructor.body));
 				out.push("};");
 				out.push("__PDEFINE__&&__PDEFINE__(this,'Destructor',__NOENUM__);");
-			}
-			
-			//Push methods - we do this separately in case of overloading
-			var _out;
-			for (var i in methods) {
-				//Method is not overloaded, just push it
-				if (methods[i].length == 1) {
-					this.classVars.push(methods[i][0]);
-					
-					_out = methods[i][0].static ?
-						((methods[i][0].body.static = true), staticItems) : out;
-					_out.push(generate(methods[i].shift()));
-					
-					this.classVars.pop();
-				}
-				//Overloaded method
-				else {
-					//TODO: method overloading
-					/*_out.push("function " + methods[i][0].name + "(){");
-					var firstVar = true;
-					for (var j=0,_len=methods[i].length;j<_len;j++) {
-						_out = methods[i][j].static ? staticItems : out;
-						if (methods[i][j].params.length) {
-							_out.push("if(arguments.length==");
-							_out.push(methods[i][j].params.length + ") {");
-							_out.push("var ");
-							for (var k=0,__len=methods[i][j].paramsList.length;k<__len;k++) {
-								if (!firstVar) _out.push(",");
-							
-								_out.push(methods[i][j].paramsList[k].value);
-							
-								if (methods[i][j].paramsList[k].initializer) {
-									_out.push("=arguments[" + k + "]!==undefined?" + 
-										"arguments[" + k + "]:" +
-										generate(methods[i][j].paramsList[k].initializer));
-								}
-								else {
-									_out.push("=arguments[" + k + "]!==undefined?" + 
-										"arguments[" + k + "]" + 
-										":undefined");
-								}
-							
-								_out.push(";");
-								_out.push(generate(methods[i][j].body));
-								_out.push(this.currentScope + "=null;");
-								_out.push("}");
-							
-								firstVar = false;
-							}
-							firstVar = true;
-						}
-						else {
-							_out.push("if(!arguments.length){");
-							_out.push(generate(methods[i][j].body));
-							_out.push(this.currentScope + "=null;");
-							_out.push("}");
-						}
-					}
-					_out.push("}");*/
-				}
 			}
 			
 			//Run static constructor last
@@ -1243,8 +1245,8 @@ compiler.prototype.compile = function (ast) {
 					"[[ClassId]]": this.CurrentClassScopeId()
 				});
 				
-				ast.public && this.classes[this.CurrentClassScopeId()].publicMembers.push(id);
-				ast.protected && this.classes[this.CurrentClassScopeId()].protectedMembers.push(id);
+				ast.public && this.classes[this.CurrentClassScopeId()].publicMembers.push(ast.name);
+				ast.protected && this.classes[this.CurrentClassScopeId()].protectedMembers.push(ast.name);
 			}
 			
 			break;
