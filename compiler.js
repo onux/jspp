@@ -655,6 +655,19 @@ compiler.prototype.compile = function (ast) {
 			
 			this.NewClass(ast);
 			
+			//If this is a subclass, get the superclass data
+			if (ast.extends) {
+				var j, superClass, superClassId;
+				for (var i in this.classes) {
+					j = this.classes[i];
+					if (j && j.id && j.id === ast.extends) {
+						superClass = j;
+						superClassId = i;
+						break;
+					}
+				}
+			}
+			
 			//Find constructors/destructor
 			for (var item in ast.body) {
 				if (!isFinite(item)) continue;
@@ -806,7 +819,9 @@ compiler.prototype.compile = function (ast) {
 
 			//Wrap in a function so we can call via: new foo(x,y,z)
 			out.push("function " + (ast.name || "") + "(){");
-			out.push("var __SUPER__;");
+			out.push("var __SUPER__" +
+					 (superClassId !== void 0 ? ",__CLASS" + superClassId + "__" : "") +
+					 ";");
 			
 			if (ast.nestedParent) {
 				//Static class expressions
@@ -1071,8 +1086,10 @@ compiler.prototype.compile = function (ast) {
 			out.push("}).call(");
 			
 			if (ast.extends) {
-				out.push("(function(o){return (F.prototype=__SUPER__=o,new F);function F(){}})(");
-				out.push("new " + ast.extends + ")");
+				out.push("(function(o){return (F.prototype=__SUPER__=" +
+						 (superClassId !== void 0 ? "__CLASS" + superClassId + "__=" : "") + 
+						 "o,new F);function F(){}})(" +
+						 "new " + ast.extends + ")");
 			}
 			else {
 				out.push("{}");

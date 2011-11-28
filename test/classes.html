@@ -219,7 +219,7 @@ class foo {
 
 bar
 </code>
-<code>
+<code class="eval">
 class foo {
 	public var bar = true;
 }
@@ -277,6 +277,45 @@ class foo {
 		return (new foo)[0];
 	}
 })()
+</code>
+<code class="eval">
+class foo {
+	public var baz = function() {
+		return bar();
+	};
+	
+	public function bar() {
+		return true;
+	}
+}
+
+(new foo).baz()
+</code>
+<code class="eval">
+class foo {
+	public var baz = function() {
+		return bar();
+	};
+	
+	protected function bar() {
+		return true;
+	}
+}
+
+(new foo).baz()
+</code>
+<code class="eval">
+class foo {
+	public var baz = function() {
+		return bar();
+	};
+	
+	private function bar() {
+		return true;
+	}
+}
+
+(new foo).baz()
 </code>
 
 <!--
@@ -772,12 +811,16 @@ test("Access Modifiers", function() {
 	
 	equal(code[i++], true, "Public variable can be accessed inside class");
 	raises(Function(code[i++]), ReferenceError, "Public variable cannot be accessed outside class");
-	raises(Function(code[i++]), ReferenceError, "Public variable cannot be accessed inside subclass");
+	equal(code[i++], true, "Public variable can be accessed inside subclass");
 	equal(code[i++], true, "Public variable can be accessed inside nested class");
 	
 	raises(Function(code[i++]), ReferenceError, "Protected variable cannot be accessed outside class");
 	equal(code[i++], true, "Protected variable can be accessed inside subclass");
 	equal(code[i++], true, "Protected variable can be accessed inside nested class");
+	
+	equal(code[i++], true, "Function declarations (resolves even if declaration comes later) - Public");
+	equal(code[i++], true, "Function declarations (resolves even if declaration comes later) - Protected");
+	equal(code[i++], true, "Function declarations (resolves even if declaration comes later) - Private");
 });
 
 test("Super", function() {
