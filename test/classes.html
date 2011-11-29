@@ -317,6 +317,105 @@ class foo {
 
 (new foo).baz()
 </code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public var baz = true;
+
+		public function getBaz() { return baz }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		protected var baz = true;
+
+		public function getBaz() { return baz }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		private var baz = true;
+
+		public function getBaz() { return baz }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public function baz(){ return 1 }
+
+		public function getBaz() { return baz() }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		protected function baz(){ return 1 }
+
+		public function getBaz() { return baz() }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		private function baz(){ return 1 }
+
+		public function getBaz() { return baz() }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public function getBaz() { return baz() }
+		
+		public function baz(){ return 1 }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public function getBaz() { return baz() }
+		
+		protected function baz(){ return 1 }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public function getBaz() { return baz() }
+		
+		private function baz(){ return 1 }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
 
 <!--
 #######################SUPER#######################
@@ -821,6 +920,18 @@ test("Access Modifiers", function() {
 	equal(code[i++], true, "Function declarations (resolves even if declaration comes later) - Public");
 	equal(code[i++], true, "Function declarations (resolves even if declaration comes later) - Protected");
 	equal(code[i++], true, "Function declarations (resolves even if declaration comes later) - Private");
+	
+	equal(code[i++], true, "Public variable of nested class resolves correctly inside nested class");
+	equal(code[i++], true, "Protected variable of nested class resolves correctly inside nested class");
+	equal(code[i++], true, "Private variable of nested class resolves correctly inside nested class");
+	
+	equal(code[i++], true, "Public function declaration of nested class resolves correctly inside nested class");
+	equal(code[i++], true, "Protected function declaration of nested class resolves correctly inside nested class");
+	equal(code[i++], true, "Private function declaration of nested class resolves correctly inside nested class");
+	
+	equal(code[i++], true, "Public function declaration of nested class resolves correctly inside nested class (resolves even if declaration comes later)");
+	equal(code[i++], true, "Protected function declaration of nested class resolves correctly inside nested class (resolves even if declaration comes later)");
+	equal(code[i++], true, "Private function declaration of nested class resolves correctly inside nested class (resolves even if declaration comes later)");
 });
 
 test("Super", function() {

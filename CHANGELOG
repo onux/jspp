@@ -2,6 +2,7 @@ Alpha 0.13
 --------
 * Fixed "this" keyword to refer to current instance of a class
 * Fixed class method declarations - behaves like JS function declarations now
+* Fixed access modifiers for nested classes
 * "protected" keyword and related tests are now working
 * "super" keyword and related tests are now working
 * Bug fixes

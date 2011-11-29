@@ -235,7 +235,7 @@ function compiler(ast, options) {
 		var currentScope = _this.scopeChain[currentScopeId] || _this.scopeChain[0];
 		var Variables = currentScope.Variables, classScopeId = -1;
 		var Functions = currentScope.Functions, isFunDecl = false;
-		
+
 		//Search function declarations first (not function expressions)
 		for (var i=0, len=Functions.length; i < len; i++) {
 			if (Functions[i].name === findIdentifier) {
@@ -797,15 +797,82 @@ compiler.prototype.compile = function (ast) {
 					
 					//Push to private members
 					privateMembers.push(currentItem.name);
+					
+					//For method declarations (and not method expressions), we
+					//should push the declaration to the "Variables" object so
+					//identifier resolution will resolve properly
+					this.CurrentClass().Variables.push({
+						identifier: currentItem.name,
+						properties: {},
+					
+						//Standard internal properties
+						"[[ReadOnly]]": false,
+						"[[DontEnum]]": false,
+						"[[DontDelete]]": !!currentItem.private,
+					
+						//Non-standard internal properties
+						"[[Public]]": !!currentItem.public,
+						"[[Private]]": !!currentItem.private,
+						"[[Static]]": !!currentItem.static,
+						"[[Protected]]": !!currentItem.protected,
+						"[[ClassMember]]": true,
+						"[[MemberOf]]": this.currentClass,
+						"[[ClassId]]": this.CurrentClassScopeId()
+					});
+				
+					if (ast.public) {
+						this.classes[this.CurrentClassScopeId()].publicMembers.push(currentItem.name);
+					}
+					if (ast.protected) {
+						this.classes[this.CurrentClassScopeId()].protectedMembers.push(currentItem.name);
+					}
 				}
 				else {
 					classItems.push(currentItem);
 					
-					if (currentItem.private && currentItem.type == jsdef.VAR) {							
-						for (var varNode in currentItem) {
-							if (!isFinite(varNode)) continue;
+					if (currentItem.type == jsdef.VAR) {
+						if (currentItem.private) {
+							for (var varNode in currentItem) {
+								if (!isFinite(varNode)) continue;
 							
-							privateMembers.push(currentItem[varNode].value);
+								privateMembers.push(currentItem[varNode].value);
+							}
+						}
+						
+						//Save variable declaration early for identifier resolution
+						//We don't actually do any code generation here
+						//This is to ensure when we process method declarations
+						//first, it will still resolve the variables correctly
+						var id = "";
+						for (var varDecl in currentItem) {
+							if (!isFinite(varDecl)) continue;
+							
+							this.CurrentClass().Variables.push(varObject = {
+								identifier: id = currentItem[varDecl].value,
+								properties: {},
+					
+								//Standard internal properties
+								"[[ReadOnly]]": false,
+								"[[DontEnum]]": false,
+								"[[DontDelete]]": true,
+					
+								//Non-standard internal properties
+								"[[Type]]": currentItem[varDecl].vartype,
+								"[[Public]]": !!currentItem.public,
+								"[[Private]]": !!currentItem.private,
+								"[[Static]]": !!currentItem.static,
+								"[[Protected]]": !!currentItem.protected,
+								"[[ClassMember]]": true,
+								"[[MemberOf]]": this.currentClass,
+								"[[ClassId]]": this.CurrentClassScopeId()
+							});
+					
+							if (ast.public) {
+								this.classes[this.CurrentClassScopeId()].publicMembers.push(id);
+							}
+							else if (ast.protected) {
+								this.classes[this.CurrentClassScopeId()].protectedMembers.push(id);
+							}
 						}
 					}
 					else if (currentItem.type == jsdef.CLASS) {
@@ -1241,31 +1308,6 @@ compiler.prototype.compile = function (ast) {
 				out.push(";");
 			}
 			
-			//Are we inside a class?
-			if (this.InsideClass()) {
-				this.CurrentClass().Variables.push({
-					identifier: ast.name,
-					properties: {},
-					
-					//Standard internal properties
-					"[[ReadOnly]]": false,
-					"[[DontEnum]]": false,
-					"[[DontDelete]]": !!ast.private,
-					
-					//Non-standard internal properties
-					"[[Public]]": !!ast.public,
-					"[[Private]]": !!ast.private,
-					"[[Static]]": !!ast.static,
-					"[[Protected]]": !!ast.protected,
-					"[[ClassMember]]": true,
-					"[[MemberOf]]": this.currentClass,
-					"[[ClassId]]": this.CurrentClassScopeId()
-				});
-				
-				ast.public && this.classes[this.CurrentClassScopeId()].publicMembers.push(ast.name);
-				ast.protected && this.classes[this.CurrentClassScopeId()].protectedMembers.push(ast.name);
-			}
-			
 			break;
 		case jsdef.CALL:
 			out.push(generate(ast[0]));
@@ -1697,7 +1739,7 @@ compiler.prototype.compile = function (ast) {
 				}
 				
 				if (insideClass) {
-					this.CurrentClass().Variables.push(varObject = {
+					(scope = this.CurrentClass()).Variables.push(varObject = {
 						identifier: id,
 						properties: {},
 					
@@ -1717,14 +1759,17 @@ compiler.prototype.compile = function (ast) {
 						"[[ClassId]]": this.CurrentClassScopeId()
 					});
 					
-					if (ast.public) this.classes[this.CurrentClassScopeId()].publicMembers.push(id);
-					else if (ast.protected) this.classes[this.CurrentClassScopeId()].protectedMembers.push(id);
+					if (ast.public) {
+						this.classes[this.CurrentClassScopeId()].publicMembers.push(id);
+					}
+					else if (ast.protected) {
+						this.classes[this.CurrentClassScopeId()].protectedMembers.push(id);
+					}
 					
-					//context.ActivationObject[id] = varObject;
-				}
-				//else {
 					scope.Variables.push(context.ActivationObject[id] = varObject);
-				//}
+				}
+				
+				scope.Variables.push(context.ActivationObject[id] = varObject);
 			}
 			
 			for (var i=0, len=varList.length, currentId = ""; i<len; i++) {
@@ -1741,7 +1786,6 @@ compiler.prototype.compile = function (ast) {
 				
 				if ("value" in varList[i]) {
 					if (varList[i].value && varList[i].value.name === void 0) {
-						
 						//If it's a "class expression" (e.g. var foo = class {})
 						//we need to assign the anonymous class a name
 						if (varList[i].value.type == jsdef.CLASS) {
@@ -1925,7 +1969,7 @@ compiler.prototype.compile = function (ast) {
 						//Remove access modifiers so:
 						//  private var foo = function(){};
 						//doesn't become:
-						// var foo = var undefined = function(){};
+						//  var foo = var undefined = function(){};
 						if (varList[i].value.type == jsdef.FUNCTION) {
 							varList[i].value.private = false;
 							varList[i].value.public = false;
