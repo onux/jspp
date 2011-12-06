@@ -922,11 +922,15 @@ compiler.prototype.compile = function (ast) {
 			//Store protected variables, regular "var" declarations don't
 			//work for nested classes
 			var classId = this.classId = "__CLASS" + ast.body.scopeId + "__";
+			
 			out.push("var " + classId + "=this,");
 			//Don't use "Object" to avoid identifier lookup
 			out.push("__PDEFINE__={}.constructor.defineProperty,");
 			out.push("__NOENUM__={enumerable:false};");
 			out.push("if(typeof __PDEFINE__!='function')__PDEFINE__=null;");
+			//Test defineProperty (IE8)
+			//Includes conditional compilation directives for optimization
+			out.push("/*@cc_on @if(1)try{({}).constructor.defineProperty({},'x',{})}catch(e){__PDEFINE__=null}@end @*/");
 
 			out.push("this.__SUPER__=__SUPER__;");
 			out.push("__PDEFINE__&&__PDEFINE__(this,'__SUPER__',__NOENUM__);");
