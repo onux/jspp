@@ -1,0 +1,29 @@
+{
+	"name":		"javascript-plusplus",
+	"author":	"Brendan Eich, Guillaume Lathoud, Roger Poon",
+	"version":	"0.011.0",
+	"description":	"javascript++",
+	"main":		"./jspp.js",
+	"repository":	{
+		"type":		"git",
+		"url":		"http://github.com/rogp/jspp"
+	},
+	"engines":	{
+		"node":		">=0.2.0-0"
+	},
+	"dependencies": {
+		"paramon":	">=0.1.0"
+	},
+	"bugs":		{
+		"url":		"http://github.com/rogp/jspp/issues"
+	},
+	"bin":		{
+		"js++":		"bin/jspp"
+	},
+	"scripts":	{
+		"preinstall":	"make jspp.js"
+	},
+	"directories":	{
+		"lib":		"."
+	}
+}
