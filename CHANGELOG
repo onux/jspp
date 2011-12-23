@@ -1,5 +1,6 @@
 Alpha 0.13
 --------
+* CLI Compiler (Credit: Jussi Kalliokoski)
 * Fixed "this" keyword to refer to current instance of a class
 * Fixed class method declarations - behaves like JS function declarations now
 * Fixed access modifiers for nested classes
