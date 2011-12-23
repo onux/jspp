@@ -3053,3 +3053,5 @@ compiler.prototype.preprocess = function(ast) {
 	
 	return ast;
 };
+
+this.compiler = compiler;

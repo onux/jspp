@@ -1,0 +1,122 @@
+#!/usr/bin/env node
+
+var	fs		= require('fs'),
+	paramon		= require('paramon'),
+	jspp		= require('javascript-plusplus'),
+	compiler	= jspp.compiler;
+
+function jsparse () {
+	return jspp.narcissus.jsparse.apply(jspp.narcissus, arguments);
+}
+
+var args = paramon.readFormat(process.argv, {
+	name:	"js++",
+	usage:	"js++ file(s) [options]",
+	params:	[
+		/*{
+			name:		'execute',
+			args:		['--execute', '-e'],
+			desc:		'Instead of printing output, execute. You can optionally specify the command to execute it with.',
+			maxParams:	1,
+		},*/
+		{
+			name:		'wrap',
+			args:		['--closure', '-c'],
+			desc:		'Wrap in a function (closure).',
+			maxParams:	0,
+		},
+		{
+			name:		'debug',
+			args:		['--debug', '-d'],
+			desc:		'Debug mode.',
+			maxParams:	0,
+		},
+		{
+			name:		'warnings',
+			args:		['--warnings', '-w'],
+			desc:		'Display warnings.',
+			maxParams:	0,
+		},
+		{
+			name:		'encoding',
+			args:		['--encoding', '-e'],
+			desc:		'The encoding to use for reading the files.',
+			maxParams:	1,
+			minParams:	1,
+		},
+		{
+			name:		'output',
+			args:		['--output', '-o'],
+			desc:		'The output target. Default=-',
+			maxParams:	1,
+			minParams:	1,
+		}
+	],
+});
+
+args.debug || process.on('uncaughtException', function (e) {
+	console.error(e);
+	process.exit(1);
+});
+
+if (!args['$!stray'].length) throw "No files specified.";
+
+/* Heavy async soup */
+
+function Dummy(){}
+Dummy.prototype.toString = function () {
+	return this.r;
+};
+Dummy.prototype.r = '';
+
+var asReady = 0;
+
+function ready () {
+	if (++asReady !== files.length) return;
+
+	/* All files ready, let's get going */
+
+	var code = files.join('\n');
+
+	var t = +new Date;
+
+	var c = new compiler(jsparse(code), {
+		debug:		args["debug"],
+		nowrap:		!args["wrap"],
+		warnings:	args["warnings"],
+	});
+
+	c.preprocess();
+
+	var output = c.compile();
+
+	console.error('Compiled in ' + (+new Date - t) + ' milliseconds.');
+
+	var filename = args["output"] || '-';
+
+	if (filename === '-') {
+		console.log(output);
+	} else {
+		fs.writeFileSync(filename, output, args["encoding"] || 'UTF-8');
+	}
+}
+
+
+var files = args['$!stray'].map(function(f){
+	var r = new Dummy;
+	if (f === '-') {
+		process.stdin.resume();
+		process.stdin.on('data', function (data) {
+			r.r += String(data);
+		});
+		process.stdin.on('end', ready);
+	} else {
+		fs.readFile(f, args["encoding"] || 'UTF-8', function(e, data) {
+			if (e) throw "Reading file '" + f + "' failed.";
+
+			r.r = String(data);
+			ready();
+		});
+	}
+	return r;
+});
