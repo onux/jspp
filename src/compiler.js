@@ -946,8 +946,8 @@ compiler.prototype.compile = function (ast) {
 				if (methods[i].length == 1) {
 					this.classVars.push(methods[i][0]);
 					
-					_out = methods[i][0].static ?
-						((methods[i][0].body.static = true), staticItems) : out;
+					_out = (methods[i][0].static && !methods[i][0].private && !methods[i][0].protected) ?
+							((methods[i][0].body.static = true), staticItems) : out;
 					_out.push(generate(methods[i].shift()));
 					
 					this.classVars.pop();
@@ -3053,5 +3053,3 @@ compiler.prototype.preprocess = function(ast) {
 	
 	return ast;
 };
-
-this.compiler = compiler;

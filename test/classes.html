@@ -144,6 +144,42 @@ class foo {
 
 (new foo).bar === (new foo).bar
 </code>
+<code class="eval">
+class foo {
+    private static function bar() {
+    }
+    public static function baz() {
+    }
+    protected static function qux() {
+    }
+}
+
+typeof foo.baz
+</code>
+<code class="eval">
+class foo {
+    private static function bar() {
+    }
+    public static function baz() {
+    }
+    protected static function qux() {
+    }
+}
+
+typeof foo.bar
+</code>
+<code class="eval">
+class foo {
+    private static function bar() {
+    }
+    public static function baz() {
+    }
+    protected static function qux() {
+    }
+}
+
+typeof foo.qux
+</code>
 
 <!--
 #######################ACCESS MODIFIERS#######################
@@ -415,6 +451,174 @@ class foo {
 }
 
 (new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	public var baz = 1;
+
+	class bar {
+		protected var baz = 2;
+
+		public function setBaz(x) {
+			baz = x;
+		}
+	}
+
+	class qux extends bar {
+		public function getBaz() {
+			return baz;
+		}
+	}
+
+	public function getBaz() {
+		var quux = new qux;
+		quux.setBaz(3);
+
+		return quux.getBaz();
+	}
+}
+
+(new foo).getBaz();
+</code>
+<code class="eval">
+class foo {
+	protected var baz = 1;
+
+	class bar {
+		protected var baz = 2;
+
+		public function setBaz(x) {
+			baz = x;
+		}
+	}
+
+	class qux extends bar {
+		public function getBaz() {
+			return baz;
+		}
+	}
+
+	public function getBaz() {
+		var quux = new qux;
+		quux.setBaz(3);
+
+		return quux.getBaz();
+	}
+}
+
+(new foo).getBaz();
+</code>
+<code class="eval">
+class foo {
+	private var baz = 1;
+
+	class bar {
+		protected var baz = 2;
+
+		public function setBaz(x) {
+			baz = x;
+		}
+	}
+
+	class qux extends bar {
+		public function getBaz() {
+			return baz;
+		}
+	}
+
+	public function getBaz() {
+		var quux = new qux;
+		quux.setBaz(3);
+
+		return quux.getBaz();
+	}
+}
+
+(new foo).getBaz();
+</code>
+<code class="eval">
+class foo {
+	public var baz = 1;
+
+	class bar {
+		public var baz = 2;
+
+		public function setBaz(x) {
+			baz = x;
+		}
+	}
+
+	class qux extends bar {
+		public function getBaz() {
+			return baz;
+		}
+	}
+
+	public function getBaz() {
+		var quux = new qux;
+		quux.setBaz(3);
+
+		return quux.getBaz();
+	}
+}
+
+(new foo).getBaz();
+</code>
+<code class="eval">
+class foo {
+	protected var baz = 1;
+
+	class bar {
+		public var baz = 2;
+
+		public function setBaz(x) {
+			baz = x;
+		}
+	}
+
+	class qux extends bar {
+		public function getBaz() {
+			return baz;
+		}
+	}
+
+	public function getBaz() {
+		var quux = new qux;
+		quux.setBaz(3);
+
+		return quux.getBaz();
+	}
+}
+
+(new foo).getBaz();
+</code>
+<code class="eval">
+class foo {
+	private var baz = 1;
+
+	class bar {
+		public var baz = 2;
+
+		public function setBaz(x) {
+			baz = x;
+		}
+	}
+
+	class qux extends bar {
+		public function getBaz() {
+			return baz;
+		}
+	}
+
+	public function getBaz() {
+		var quux = new qux;
+		quux.setBaz(3);
+
+		return quux.getBaz();
+	}
+}
+
+(new foo).getBaz();
 </code>
 
 <!--
@@ -896,6 +1100,10 @@ test("Static and Instance Members", function() {
 	equal(code[i++], void 0, "Instance variables cannot be accessed without instance");
 	raises(Function(code[i++]), TypeError, "Instance methods cannot be accessed without instance");
 	equal(code[i++], true, "Instance pure method equality");
+	
+	equal(code[i++], "function", "public static can be accessed outside class");
+	equal(code[i++], "undefined", "private static cannot be accessed outside class");
+	equal(code[i++], "undefined", "protected static cannot be accessed outside class");
 });
 
 test("Access Modifiers", function() {
@@ -932,6 +1140,14 @@ test("Access Modifiers", function() {
 	equal(code[i++], true, "Public function declaration of nested class resolves correctly inside nested class (resolves even if declaration comes later)");
 	equal(code[i++], true, "Protected function declaration of nested class resolves correctly inside nested class (resolves even if declaration comes later)");
 	equal(code[i++], true, "Private function declaration of nested class resolves correctly inside nested class (resolves even if declaration comes later)");
+	
+	equal(code[i++], 3, "Nested Class B extends Class A and overwrites private variable of Class A with protected variable. Nested Class C (extends Nested Class B) resolves protected variable correctly");
+	equal(code[i++], 3, "Nested Class B extends Class A and overwrites public variable of Class A with protected variable. Nested Class C (extends Nested Class B) resolves protected variable correctly");
+	equal(code[i++], 3, "Nested Class B extends Class A and overwrites protected variable of Class A with protected variable. Nested Class C (extends Nested Class B) resolves protected variable correctly");
+	
+	equal(code[i++], 3, "Nested Class B extends Class A and overwrites private variable of Class A with public variable. Nested Class C (extends Nested Class B) resolves public variable correctly");
+	equal(code[i++], 3, "Nested Class B extends Class A and overwrites public variable of Class A with public variable. Nested Class C (extends Nested Class B) resolves public variable correctly");
+	equal(code[i++], 3, "Nested Class B extends Class A and overwrites protected variable of Class A with public variable. Nested Class C (extends Nested Class B) resolves public variable correctly");
 });
 
 test("Super", function() {
