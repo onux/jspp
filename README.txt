@@ -21,7 +21,10 @@ Tutorial: http://jspp.javascript.am/tutorial.html
 
 Installation & Usage
 ---------------------
+
 Getting up and running is quick and simple:
+
+### Browser
 
 1. Open compiler.html in your favorite web browser.
 
@@ -38,7 +41,26 @@ alert(foo);
 
 6. Open your browser's console to view the warnings and errors produced by the compiler.
 
-A command-line compiler is not available for the current alpha.
+### CLI
+
+1. Install via npm
+
+```
+sudo npm install javascript-plusplus -g
+```
+
+or if you're building from sources, go to the main directory and do
+
+```
+sudo npm install -g
+```
+
+2. Example usages:
+
+```
+js++ file1.jspp file2.jspp -o out.js # compile the two files and save to file out.js
+cat file1.jspp file2.jspp | js++ - > out.js # same thing, but with stdio pipes
+```
 
 A command-line REPL is not available for the current alpha.
 
