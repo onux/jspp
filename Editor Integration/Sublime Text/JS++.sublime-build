@@ -1,0 +1,6 @@
+{
+	"cmd": ["js++", "$file"],
+	"file_regex": "^Compiling: (\\S+)",
+	"line_regex": "\\[  ERROR  \\] (?!line).*line (\\d+) char (\\d+)",
+	"selector": "source.jspp"
+}
