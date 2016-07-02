@@ -1140,7 +1140,7 @@
 			<array>
 				<dict>
 					<key>match</key>
-					<string>\\(\\{{|}}|[abfnrutv'"]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|[0-7]{3})</string>
+					<string>\\(\\{{|}}|[abfnrtv'"`]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|[0-7]{3})</string>
 					<key>name</key>
 					<string>constant.character.escape.jspp</string>
 				</dict>
@@ -1261,7 +1261,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>[`|`;]</string>
+					<string>`</string>
 					<key>endCaptures</key>
 					<dict>
 						<key>0</key>
@@ -1272,6 +1272,13 @@
 					</dict>
 					<key>name</key>
 					<string>string.quoted.raw.jspp</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#string_escaped_char</string>
+						</dict>
+					</array>
 				</dict>
 			</array>
 		</dict>
