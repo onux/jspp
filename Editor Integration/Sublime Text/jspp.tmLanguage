@@ -65,8 +65,77 @@
 			<string>^\s*(import)\b(?:\s*([^ ;$]+)\s*(;)?)?</string>
 			<key>name</key>
 			<string>meta.import.jspp</string>
+			
+		 </dict>
+			<dict>
+			<key>begin</key>
+			<string>(^|&amp;&amp;|\|\||!)\s*(/)(?![/*+{}?])</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.string.begin.js</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(/)[igm]*</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.string.end.js</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>string.regexp.js</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>match</key>
+					<string>\\.</string>
+					<key>name</key>
+					<string>constant.character.escape.js</string>
+				</dict>
+			</array>
 		</dict>
-	
+		<dict>
+			<key>match</key>
+			<string>\;</string>
+			<key>name</key>
+			<string>punctuation.terminator.statement.js</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>,[ |\t]*</string>
+			<key>name</key>
+			<string>meta.delimiter.object.comma.js</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\.</string>
+			<key>name</key>
+			<string>meta.delimiter.method.period.js</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\{|\}</string>
+			<key>name</key>
+			<string>meta.brace.curly.js</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\(|\)</string>
+			<key>name</key>
+			<string>meta.brace.round.js</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\[|\]</string>
+			<key>name</key>
+			<string>meta.brace.square.js</string>
+		</dict>
 		<dict>
 			<key>include</key>
 			<string>#code</string>
