@@ -1,0 +1,118 @@
+/L7"JS++" CSHARP_LANG Line Comment = // Block Comment On = /* Block Comment Off = */ Escape Char = \  String Chars = "'`   File Extensions = JPP JSPP
+/Regexp Type = Perl
+/TGBegin "Functions"
+/TGFindStr = "^[ \t]*[a-z_\.0-9]+[ \t]+[a-z_\.0-9]+[ \t]+[a-z_\.0-9<>]+[ \t]+([0-9\\.a-z_ \t]*)\(+[^=;\n]+$"
+/TGFindStr = "^[ \t]*[a-z_\.0-9]+[ \t]+[a-z_\.0-9<>]+[ \t]+([0-9a-z_\. \t]*)\(+[^=;\n]+$"
+/TGFindStr = "^[ ^t]*p+[a-z_\.0-9]+[ \t]+([0-9a-z_\. \t]*)\(+[^=;\n]+$"
+/TGFindStr = "^[ \t]*[a-z_0-9]+[ \t]+([0-9a-z_]+\.[0-9a-z_]+)\(+[^=;\n]+$"
+/TGBegin "Parameters"
+/TGFindStr = "[ \t\n]*([^,]+)"
+/TGFindBStart = "\("
+/TGFindBEnd = "\)"
+/TGEnd
+/TGBegin "Variables"
+//type name;
+/TGFindStr = "^[ \t]*([a-z0-9_]+[ \t\*]+[a-z0-9\[\]_]+);"
+/TGFindBStart = "\{"
+/TGFindBEnd = "\}"
+//type name = init;
+/TGFindStr = "^[ \t]*([a-z0-9_]+[ \t\*]+[a-z0-9_]+[ \t\*]+[a-z0-9\[\]_]+)[ \t]*=.*;"
+/TGFindBStart = "\{"
+/TGFindBEnd = "\}"
+/TGEnd
+/TGEnd
+/Delimiters = ~!@%^&*()-+=|\/{}[]:;"'<> ,	.?`
+/Member String = "([a-z0-9_:\.]+)[ \t\*&]+\$S[ \t]*[\(=;]"
+/Variable String = "([a-z0-9_:\.]+)[ \t\*&]+\$S[ \t]*[\(=;]"
+/Indent Strings = "{"
+/Unindent Strings = "}"
+/Open Brace Strings =  "{" "(" "["
+/Close Brace Strings = "}" ")" "]"
+/Open Fold Strings = "{" "#region"
+/Close Fold Strings = "}" "#endregion"
+/C1"Keywords" STYLE_KEYWORD
+abstract 
+break
+case catch continue 
+debugger default delete do 
+else explicit export extends external 
+final finally for foreach function 
+if implements implicit in inline instanceof 
+let  
+new null 
+optional override 
+private protected public 
+return 
+static super switch 
+this throw try typeof 
+undefined 
+virtual void 
+while with 
+yield 
+/C2" Data Types" STYLE_KEYWORD
+bool byte
+char const class
+double
+enum
+float false 
+int interface 
+long
+module
+property
+short signed string
+true  typeid
+unsigned 
+var 
+/C3" Other Keywords" STYLE_EXTENSION
+import package 
+/C4"Operators" STYLE_OPERATOR
+;
+[
+]
+[]
+(
+)
+()
+.
+,
+:
+===
+==
+=
+!==
+!=
+!
+<<=
+<<;
+<=
+<
+>>>=
+>>>
+>>=
+>>
+>=
+>
++=
+++
++
+-=
+--
+-
+*=
+*
+/=
+/
+%=
+%
+&&=
+&&
+&=
+&
+||=
+||
+|=
+|
+^=
+^
+~
+?=
