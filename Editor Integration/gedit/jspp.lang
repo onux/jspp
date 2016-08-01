@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<language id="jspp" _name="JS++" version="2.0" _section="Sources">
+	<metadata>
+		<property name="mimetypes">text/x-jsppsrc;text/x-js++;text/x-jspp</property>
+		<property name="globs">*.jspp</property>
+		<property name="line-comment-start">//</property>
+		<property name="block-comment-start">/*</property>
+		<property name="block-comment-end">*/</property>
+	</metadata>
+
+	<styles>
+		<style id="comment" _name="Comment" map-to="def:comment"/>
+		<style id="error" _name="Error" map-to="def:error"/>
+		<style id="string" _name="String" map-to="def:string"/>
+		<style id="const-value" _name="Const Value" map-to="def:special-constant"/>
+		<style id="boolean" _name="Boolean Value" map-to="def:boolean"/>
+		<style id="number" _name="Number" map-to="def:decimal"/>
+		<style id="keyword" _name="Keyword" map-to="def:keyword"/>
+		<style id="type" _name="Data Type" map-to="def:type"/>
+		<style id="regex" _name="Regex" map-to="def:string"/>
+		<style id="ext-const" _name="Extra Const" map-to="def:float"/>
+		<style id="escaped-character" _name="Escaped Character" map-to="def:special-char"/>
+	</styles>
+
+	<definitions>
+		<define-regex id="escaped-character" extended="true">
+			\\(               # leading backslash
+			[\\\"\'nrbtf] |   # escaped character
+			[0-9]{1,3}    |   # latin encoded char
+			u[0-9]{1,4}   |   # unicode char
+			x[0-9a-fA-F]{1,2}
+			)
+		</define-regex>
+
+		<context id="jspp" class="no-spell-check">
+			<include>
+				<context ref="line-comment"/>
+				<context ref="block-comment"/>
+				<context ref="close-comment-outside-comment"/>
+
+				<context ref="string-double"/>
+				<context ref="string-single"/>
+				<context ref="char"/>
+				<context ref="numeric"/>
+				<context ref="const-value"/>
+				<context ref="boolean"/>
+				<context ref="keywords"/>
+				<context ref="non-keywords"/>
+				<context ref="types"/>
+
+				<context ref="regular-expression"/>
+			</include>
+		</context>
+
+		<!-- Comments -->
+		<context id="line-comment" style-ref="comment" class="comment" class-disabled="no-spell-check">
+			<start>//</start>
+			<end>$</end>
+			<include>
+				<context ref="def:line-continue"/>
+				<context ref="def:in-comment"/>
+			</include>
+		</context>
+
+		<context id="block-comment" style-ref="comment" class="comment" class-disabled="no-spell-check">
+			<start>/\*</start>
+			<end>\*/</end>
+			<include>
+				<context ref="def:in-comment"/>
+			</include>
+		</context>
+
+		<context id="close-comment-outside-comment" style-ref="error">
+			<match>\*/(?!\*)</match>
+		</context>
+
+		<!-- Strings -->
+		<context id="string-double" style-ref="string" class="string" class-disabled="no-spell-check">
+			<start>"</start>
+			<end>"</end>
+			<include>
+				<context id="escaped-character1" style-ref="escaped-character">
+					<match>\%{escaped-character}</match>
+				</context>
+				<context ref="def:line-continue"/>
+			</include>
+		</context>
+		<context id="string-single" style-ref="string" class="string" class-disabled="no-spell-check">
+			<start>'</start>
+			<end>'</end>
+			<include>
+				<context id="escaped-character2" style-ref="escaped-character">
+					<match>\%{escaped-character}</match>
+				</context>
+				<context ref="def:line-continue"/>
+			</include>
+		</context>
+		
+		<context id="char" style-ref="string">
+			<match>`(\%{escaped-character}|.)`</match>
+		</context>
+
+		<!-- Constants -->
+		<context id="const-value" style-ref="const-value">
+			<keyword>null</keyword>
+			<keyword>undefined</keyword>
+		</context>
+		<context id="boolean" style-ref="boolean">
+			<keyword>false</keyword>
+			<keyword>true</keyword>
+		</context>
+
+		<!-- Keywords -->
+		<context id="keywords" style-ref="keyword">
+			<keyword>this</keyword>
+			<keyword>super</keyword>
+			<keyword>new</keyword>
+			<keyword>delete</keyword>
+			
+			<keyword>break</keyword>
+			<keyword>case</keyword>
+			<keyword>catch</keyword>
+			<keyword>continue</keyword>
+			<keyword>default</keyword>
+			<keyword>do</keyword>
+			<keyword>else</keyword>
+			<keyword>for</keyword>
+			<keyword>if</keyword>
+			<keyword>in</keyword>
+			<keyword>instanceof</keyword>
+			<keyword>return</keyword>
+			<keyword>switch</keyword>
+			<keyword>while</keyword>
+			<keyword>with</keyword>
+			<keyword>try</keyword>
+			<keyword>finally</keyword>
+			<keyword>throw</keyword>
+			<keyword>foreach</keyword>
+			<keyword>typeof</keyword>
+			<keyword>typeid</keyword>
+			
+			<keyword>debugger</keyword>
+			
+			<keyword>Infinity</keyword>
+			<keyword>NaN</keyword>
+		</context>
+
+		<context id="non-keywords" style-ref="error">
+			<keyword>const</keyword>
+			<keyword>package</keyword>
+			<keyword>implements</keyword>
+			<keyword>extends</keyword>
+			<keyword>let</keyword>
+			<keyword>yield</keyword>
+			<keyword>synchronized</keyword>
+			<keyword>transient</keyword>
+			<keyword>volatile</keyword>
+			<keyword>export</keyword>
+		</context>
+
+		<context id="types" style-ref="type">
+			<keyword>function</keyword>
+			<keyword>var</keyword>
+			
+			<keyword>optional</keyword>
+			<keyword>import</keyword>
+			<keyword>implicit</keyword>
+			<keyword>explicit</keyword>
+			<keyword>external</keyword>
+
+			<keyword>module</keyword>
+			<keyword>class</keyword>
+			<keyword>enum</keyword>
+			<keyword>interface</keyword>
+			
+			<keyword>abstract</keyword>
+			<keyword>property</keyword>
+			<keyword>virtual</keyword>
+			<keyword>override</keyword>
+			<keyword>inline</keyword>
+			<keyword>final</keyword>
+			<keyword>static</keyword>
+
+			<keyword>private</keyword>
+			<keyword>protected</keyword>
+			<keyword>public</keyword>
+
+			<keyword>bool</keyword>
+			<keyword>byte</keyword>
+			<keyword>char</keyword>
+			<keyword>short</keyword>
+			<keyword>int</keyword>
+			<keyword>long</keyword>
+			<keyword>float</keyword>
+			<keyword>double</keyword>
+			<keyword>signed</keyword>
+			<keyword>unsigned</keyword>
+			<keyword>string</keyword>
+			<keyword>void</keyword>
+		</context>
+
+		<!-- Regrex pattern -->
+		<context id="regular-expression">
+			<match>(/.*/[gmi]*)\s*[;,\]}]+</match>
+			<include>
+				<context sub-pattern="1" style-ref="regex"/>
+			</include>
+		</context>
+
+		<!-- literal -->
+		<context id="numeric" style-ref="number">
+			<match extended="true">
+				(\b([0-9]+|0[xX][0-9a-fA-F]+)[UuLl]*\b|
+				\b(([0-9]+[Ee][-]?[0-9]+|
+				([0-9]*\.[0-9]+|[0-9]+\.)([Ee][-]?[0-9]+)?)[fFdD]?|
+				[0-9]+[FfDd]))
+			</match>
+		</context>
+	</definitions>
+</language>
