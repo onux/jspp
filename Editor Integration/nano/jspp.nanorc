@@ -1,0 +1,24 @@
+syntax "JS++" "\.jspp$"
+
+# color brightwhite "\<[A-Z_][0-9A-Z_]+\>" 
+
+# Keywords
+color green "\<(if|in|do|for|new|try|let|this|else|case|with|while|break|catch|throw|const|yield|return|typeof|delete|switch|default)\>"
+color green "\<(finally|continue|debugger|instanceof|export|extends|implements|package|true|false|null)\>"
+color green "\<(import|external|module|foreach|typeid|enum|interface|class|super|implicit|explicit|undefined)\>"
+color green "\<(private|protected|public|static|final|inline|property|abstract|optional|virtual|override)\>"
+
+# Data types
+color brightgreen "\<(var|function|bool|string|byte|short|int|long|float|double|char|void|signed|unsigned)\>"
+
+# Strings
+color brightyellow start="'''" end="'''"
+color brightyellow start=""""" end="""""
+color brightyellow start=""(\\.|[^"])*\\[[:space:]]*$" end="^(\\.|[^"])*""
+color brightyellow start="'(\\.|[^'])*\\[[:space:]]*$" end="^(\\.|[^'])*'"
+
+color brightyellow ""(\\.|[^"])*"" "'(\\.|[^'])*'" "`(\\.|[^`])*`"
+
+## Comment highlighting
+color yellow "//.*"
+color yellow start="/\*" end="\*/"
