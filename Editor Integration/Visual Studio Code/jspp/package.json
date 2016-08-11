@@ -1,0 +1,19 @@
+{
+	"name": "jspp",
+	"version": "0.1.0",
+	"publisher": "vscode",
+	"engines": { "vscode": "*" },
+	"contributes": {
+		"languages": [{
+			"id": "jspp",
+			"extensions": [ ".jspp", ".jpp" ],
+			"aliases": [ "JS++", "js++" ],
+			"configuration": "./language-configuration.json"
+		}],
+		"grammars": [{
+			"language": "jspp",
+			"scopeName": "source.jspp",
+			"path": "./syntaxes/jspp.plist"
+		}]
+	}
+}
