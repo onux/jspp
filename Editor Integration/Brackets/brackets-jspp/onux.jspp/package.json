@@ -1,0 +1,13 @@
+{
+    "name": "onux.jspp",
+    "title": "JS++ Language Support",
+    "description": "Syntax highlighting for the JS++ language.",
+    "homepage": "https://www.onux.com/jspp/",
+    "version": "1.0.0",
+    "author": "Onux Corp.",
+    "license": "MIT",
+    "engines": {
+        "brackets": ">=0.24.0"
+    },
+    "i18n": ["en"]
+}
