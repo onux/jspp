@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<head>
+<title>JS++ SyntaxHighlighter</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/styles/shCore.min.css" type="text/css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/styles/shThemeDefault.min.css" type="text/css">
+<style type="text/css">
+body { font-family: Arial, sans-serif; }
+p { font-size: 0.8em; }
+a { color: #0000ff; }
+a:hover { text-decoration: none; }
+</style>
+</head>
+<body>
+
+<h2>JS++ SyntaxHighlighter Demo</h2>
+
+<p>This is JS++ syntax highlighting for embedding JS++ code and snippets in web pages using the <a href="http://alexgorbatchev.com/SyntaxHighlighter/" target="_blank">SyntaxHighlighter from Alex Gorbatchev</a>.</p>
+
+<div style="width: 50%;">
+<pre class="brush: jspp">
+external jQuery, $;
+
+string url = $("#logo").attr("src");
+</pre>
+</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shCore.min.js"></script>
+<script type="text/javascript" src="shBrushJSPP.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+</body>
+</html>

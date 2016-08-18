@@ -1,0 +1,60 @@
+<!doctype html>
+<meta charset="utf-8"/>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/codemirror.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/addon/fold/foldgutter.css">
+
+<style type="text/css">
+body {font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;}
+.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black;}
+</style>
+
+<h2>jspp-codemirror demo</h2>
+
+<textarea id="code" name="code">
+class StringArray
+{
+    // Array of reference types (instance of System.String)
+    private System.String[] data = [];
+ 
+    // Implicit conversion from external to StringArray
+    implicit StringArray(external ex) {
+        // Confirm the external is at least an array
+        assert(typeid ex == "Array");
+        var ex2 = ex.clone();
+ 
+        // Loop through every element of the external
+        // array to ensure they are strings
+        for (int i = 0, len = ex2.length; i < len; ++i) {
+            // If element’s a string, continue.
+            if (typeof ex2[i] == "string") {
+                continue;
+            }
+            // If it’s not a string, force the conversion.
+            else {
+                ex2[i] = Convert.toString(ex2[i]);
+            }
+        }
+ 
+        data = ex2;
+
+        return this;
+    }
+}
+</textarea>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/codemirror.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/addon/mode/simple.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/addon/fold/foldcode.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/addon/fold/foldgutter.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/addon/fold/brace-fold.js"></script>
+<script src="jspp.js"></script>
+
+<script>
+var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+    mode: 'jspp',
+    lineNumbers: true,
+    foldGutter: true,
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+});
+</script>
