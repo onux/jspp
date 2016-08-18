@@ -72,6 +72,7 @@ define(function () {
                 'single_quoted_hack_string',
             ],
             lineComment: '//',
+            fold: 'brace',
         },
     });
     

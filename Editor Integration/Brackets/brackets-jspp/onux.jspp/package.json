@@ -3,7 +3,7 @@
     "title": "JS++ Language Support",
     "description": "Syntax highlighting for the JS++ language.",
     "homepage": "https://www.onux.com/jspp/",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": "Onux Corp.",
     "license": "MIT",
     "engines": {
