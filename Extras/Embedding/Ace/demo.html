@@ -1,0 +1,23 @@
+<!doctype html>
+<title>ace-mode-jspp demo</title>
+<meta charset="utf-8"/>
+
+<style type="text/css">
+#code {position: absolute; top: 0; right: 0; bottom: 0; left: 0;}
+</style>
+
+<div id="code">import System;
+
+Console.log("Hello World!");</div>
+
+<script src="https://cdn.jsdelivr.net/ace/1.2.4/min/ace.js"></script>
+<!-- mode-jspp shares some dependencies with mode-javascript -->
+<script src="https://cdn.jsdelivr.net/ace/1.2.4/min/mode-javascript.js"></script>
+<script src="jspp.js"></script>
+<script src="jspp_highlight_rules.js"></script>
+
+<script>
+var editor = ace.edit("code");
+editor.setTheme("ace/theme/monokai");
+editor.getSession().setMode("ace/mode/jspp");
+</script>
