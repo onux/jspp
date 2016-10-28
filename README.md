@@ -1,6 +1,6 @@
-JS++ (JSPP) Compiler
+JS++ (JSPP)
 -----------------------
 
 Official website: https://www.onux.com/jspp
 
-Please visit the official website to download JS++ and stay up-to-date.
+Please visit the official website to download the JS++ compiler and stay up-to-date.
