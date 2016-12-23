@@ -1,0 +1,3 @@
+[submodule "Libraries/jsppUnit"]
+	path = Libraries/jsppUnit
+	url = https://github.com/onux/jsppUnit
