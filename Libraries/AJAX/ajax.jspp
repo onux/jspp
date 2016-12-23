@@ -1,0 +1,138 @@
+import Convert;
+import Externals.JS;
+
+external ActiveXObject, XMLHttpRequest;
+
+/**
+ * An AJAX library for JS++.
+ */
+module Vendor.Onux.Utils.DOM.AJAX
+{
+	/**
+	 * Get the XMLHttpRequest object for AJAX.
+	 */
+	private function getXHR() {
+		var xmlHttp = null;
+		try {
+			xmlHttp = new XMLHttpRequest();
+		}
+		catch (e) {
+			try {
+				xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+			}
+			catch (e) {
+				xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+			}
+		}
+
+		if (xmlHttp == null) {
+			throw "Your browser does not support AJAX.";
+		}
+
+		return xmlHttp;
+	}
+	/**
+	 * Generate a unique URL to circumvent the web browser's cache.
+	 *
+	 * @param url The URL to make unique.
+	 * @return A modified unique URL.
+	 */
+	private string generateBustcacheUrl(string url) {
+		string bustcache = "";
+		for (int i = 0; i < 16; ++i) {
+			bustcache += (~~(Math.random() * 11)).toString(16);
+		}
+
+		bool hasQueryString = Convert.toBoolean(~url.indexOf("?"));
+		return (hasQueryString ? "&" : "?") + "bustcache=" + bustcache;
+	}
+
+	/**
+	 * @overload get
+	 *
+	 * Sends an HTTP GET request using AJAX.
+	 */
+	/**
+	 * @param url The URL resource to send the HTTP request to.
+	 */
+	public string get(string url) {
+		get(url, void(string _) {});
+	}
+	/**
+	 * @param url The URL resource to send the HTTP request to.
+	 * @param callback The function to execute once the request completes or fails.
+	 */
+	public string get(string url, void(string) callback) {
+		get(url, callback, false);
+	}
+	/**
+	 * @param url The URL resource to send the HTTP request to.
+	 * @param callback The function to execute once the request completes or fails.
+	 * @param cache Load the resource from the browser's cache. Defaults to 'false'.
+	 */
+	public string get(string url, void(string) callback, bool cache) {
+		var xmlHttp = getXHR();
+		xmlHttp.onreadystatechange = function() {
+			if (this.readyState === 4) {
+				callback(this.responseText || "");
+
+				this.onreadystatechange = null;
+			}
+		};
+
+		if (!cache) {
+			url = generateBustcacheUrl(url);
+		}
+
+		xmlHttp.open("GET", url, true);
+		xmlHttp.send(null);
+	}
+
+	/**
+	 * @overload post
+	 *
+	 * Sends an HTTP POST request using AJAX.
+	 */
+	/**
+	 * @param url The URL resource to send the HTTP request to.
+	 * @param data The data to send to the URL resource via HTTP POST (in query string format).
+	 */
+	public string post(string url, string data) {
+		post(url, data, void(string _) {});
+	}
+	/**
+	 * @param url The URL resource to send the HTTP request to.
+	 * @param data The data to send to the URL resource via HTTP POST (in query string format).
+	 * @param callback The function to execute once the request completes or fails.
+	 */
+	public string post(string url, string data, void(string) callback) {
+		post(url, data, callback, false);
+	}
+	/**
+	 * @param url The URL resource to send the HTTP request to.
+	 * @param data The data to send to the URL resource via HTTP POST (in query string format).
+	 * @param callback The function to execute once the request completes or fails.
+	 * @param cache Load the resource from the browser's cache. Defaults to 'false'.
+	 */
+	public string post(string url, string data, void(string) callback, bool cache) {
+		var xmlHttp = getXHR();
+
+		if (!cache) {
+			url = generateBustcacheUrl(url);
+		}
+
+		xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xmlHttp.onreadystatechange = function() {
+			if (this.readyState === 4) {
+				callback(this.responseText || "");
+
+				this.onreadystatechange = null;
+			}
+		};
+
+		xmlHttp.open("POST", url, true);
+		xmlHttp.send(data);
+	}
+
+	// TODO: 'post' overload with 'external' data... process the JS object and convert to string, then call string overloads
+}
