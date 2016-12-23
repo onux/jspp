@@ -1,0 +1,13 @@
+import Vendor.Onux.ConsoleStyle.Colors;
+
+external console;
+
+console.log(Colors.black("black"));
+console.log(Colors.red("red"));
+console.log(Colors.green("green"));
+console.log(Colors.yellow("yellow"));
+console.log(Colors.blue("blue"));
+console.log(Colors.purple("purple"));
+console.log(Colors.cyan("cyan"));
+console.log(Colors.white("white"));
+console.log(Colors.gray("gray"));

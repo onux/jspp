@@ -1,0 +1,37 @@
+import Vendor.JSPPUnit;
+import Vendor.Onux.ConsoleStyle.Colors;
+
+module Vendor.Onux.ConsoleStyle.Colors.Test
+{
+	public void queue() {
+		suite("ConsoleStyle.Colors", void() {
+			test("black", void() {
+				Assert.equal(Colors.black("black"), "\x1B[30m" + "black" + "\x1B[0m");
+			});
+			test("red", void() {
+				Assert.equal(Colors.red("red"), "\x1B[31m" + "red" + "\x1B[0m");
+			});
+			test("green", void() {
+				Assert.equal(Colors.green("green"), "\x1B[32m" + "green" + "\x1B[0m");
+			});
+			test("yellow", void() {
+				Assert.equal(Colors.yellow("yellow"), "\x1B[33m" + "yellow" + "\x1B[0m");
+			});
+			test("blue", void() {
+				Assert.equal(Colors.blue("blue"), "\x1B[34m" + "blue" + "\x1B[0m");
+			});
+			test("purple", void() {
+				Assert.equal(Colors.purple("purple"), "\x1B[35m" + "purple" + "\x1B[0m");
+			});
+			test("cyan", void() {
+				Assert.equal(Colors.cyan("cyan"), "\x1B[36m" + "cyan" + "\x1B[0m");
+			});
+			test("white", void() {
+				Assert.equal(Colors.white("white"), "\x1B[37m" + "white" + "\x1B[0m");
+			});
+			test("gray", void() {
+				Assert.equal(Colors.gray("gray"), "\x1B[90m" + "gray" + "\x1B[0m");
+			});
+		});
+	}
+}

@@ -1,0 +1,6 @@
+import Vendor.JSPPUnit;
+import Vendor.Onux.ConsoleStyle.Colors.Test;
+
+Colors.Test.queue();
+
+JSPPUnit.run();
