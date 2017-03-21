@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link media="screen" type="text/css" rel="stylesheet" href="qunit.css">
+	<title>JS++ Unit Tests: Classes</title>
+	<style type="text/css">
+		code { display: none; }
+	</style>
+</head>
+<body>
+
+<h1 id="qunit-header">JavaScript++ Classes</h1>
+<h2 id="qunit-banner"></h2>
+<div id="qunit-testrunner-toolbar"></div>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+<div id="qunit-fixture">test markup, will be hidden</div>
+
+<!--
+#######################BASIC REQUIREMENTS#######################
+-->
+<code>
+class foo {}
+</code>
+<code>
+var x = class x {};
+</code>
+<code>
+var x = class {};
+</code>
+<code>
+class foo {
+	class bar {
+	}
+}
+</code>
+<code>
+class foo {
+}
+class bar : foo {
+}
+</code>
+<code>
+new class foo {}
+</code>
+<code>
+new class {}
+</code>
+<code class="eval">
+(class {
+	public function Constructor() {
+		return true;
+	}
+})()
+</code>
+<code>
+class foo{
+	public var bar;
+}
+</code>
+<code>
+class foo {
+	public function bar(){}
+}
+</code>
+<code class="eval">
+class foo {
+	public var baz = function() {
+		return bar();
+	};
+	
+	public function bar() {
+		return true;
+	}
+}
+
+(new foo).baz()
+</code>
+
+<!--
+#######################STATIC AND INSTANCE MEMBERS#######################
+-->
+<code>
+class foo {
+	static var bar = true;
+}
+</code>
+<code class="eval">
+class foo {
+	static var bar = true;
+}
+foo.bar
+</code>
+<code class="eval">
+class foo {
+	static function bar() {
+		return true;
+	}
+}
+foo.bar()
+</code>
+<code>
+class foo {
+}
+new foo()
+</code>
+<code class="eval">
+class foo {
+	public var bar = true;
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	public function bar() {
+		return true;
+	}
+}
+
+(new foo).bar()
+</code>
+<code class="eval">
+class foo {
+	public var bar = true;
+}
+
+foo.bar
+</code>
+<code>
+class foo {
+	public function bar() {
+		return true;
+	}
+}
+
+foo.bar()
+</code>
+<code class="eval">
+class foo {
+	public var bar = true;
+}
+
+(new foo).bar === (new foo).bar
+</code>
+
+<!--
+#######################ACCESS MODIFIERS#######################
+-->
+<code>
+class foo {
+	public var bar = 1;
+}
+</code>
+<code>
+class foo {
+	private var bar = 1;
+}
+</code>
+<code>
+class foo {
+	protected var bar = 1;
+}
+</code>
+<code class="eval">
+(class {
+	private var bar = true;
+	
+	public function Constructor() {
+		return bar;
+	}
+})()
+</code>
+<code>
+class foo {
+	private var bar = 1;
+}
+
+bar
+</code>
+<code>
+class foo {
+	private var bar = 1;
+}
+
+(class baz : foo {
+	public function Constructor() {
+		return bar;
+	}
+})()
+</code>
+<code>
+class foo {
+	private var bar = true;
+	
+	static var baz = class {
+		public function Constructor() {
+			return bar;
+		}
+	};
+}
+
+foo.baz()
+</code>
+<code class="eval">
+(class {
+	public var bar = true;
+	
+	public function Constructor() {
+		return bar;
+	}
+})()
+</code>
+<code>
+class foo {
+	public var bar = true;
+}
+
+bar
+</code>
+<code class="eval">
+class foo {
+	public var bar = true;
+}
+
+(class : foo {
+	public function Constructor() {
+		return bar;
+	}
+})()
+</code>
+<code class="eval">
+class foo {
+	public var bar = true;
+	
+	class baz {
+		static var qux = bar;
+	}
+	
+	public function quux() {
+		return baz.qux;
+	}
+}
+
+(new foo).quux()
+</code>
+<code>
+class foo {
+	protected var bar = true;
+}
+
+bar
+</code>
+<code class="eval">
+class foo {
+	protected var bar = true;
+}
+
+(class : foo {
+	public function Constructor() {
+		return bar;
+	}
+})()
+</code>
+<code class="eval">
+(class {
+	protected var bar = true;
+	
+	class foo {
+		public function Constructor() {
+			return [bar];
+		}
+	}
+	
+	public function Constructor() {
+		return (new foo)[0];
+	}
+})()
+</code>
+<code class="eval">
+class foo {
+	public var baz = function() {
+		return bar();
+	};
+	
+	public function bar() {
+		return true;
+	}
+}
+
+(new foo).baz()
+</code>
+<code class="eval">
+class foo {
+	public var baz = function() {
+		return bar();
+	};
+	
+	protected function bar() {
+		return true;
+	}
+}
+
+(new foo).baz()
+</code>
+<code class="eval">
+class foo {
+	public var baz = function() {
+		return bar();
+	};
+	
+	private function bar() {
+		return true;
+	}
+}
+
+(new foo).baz()
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public var baz = true;
+
+		public function getBaz() { return baz }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		protected var baz = true;
+
+		public function getBaz() { return baz }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		private var baz = true;
+
+		public function getBaz() { return baz }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public function baz(){ return 1 }
+
+		public function getBaz() { return baz() }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		protected function baz(){ return 1 }
+
+		public function getBaz() { return baz() }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		private function baz(){ return 1 }
+
+		public function getBaz() { return baz() }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public function getBaz() { return baz() }
+		
+		public function baz(){ return 1 }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public function getBaz() { return baz() }
+		
+		protected function baz(){ return 1 }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+<code class="eval">
+class foo {
+	static var bar = class {
+		public function getBaz() { return baz() }
+		
+		private function baz(){ return 1 }
+	};
+}
+
+(new foo.bar).getBaz();
+</code>
+
+<!--
+#######################SUPER#######################
+-->
+<code>
+class foo {
+	public var bar = 1;
+}
+class bar : foo {
+	public var baz = super.bar;
+}
+</code>
+<code class="eval">
+class foo {
+	public function bar(){ return true }
+}
+class bar : foo {
+	public var baz = super.bar;
+	
+	public function Constructor() {
+		return baz;
+	}
+}
+(new bar)()
+</code>
+<code class="eval">
+class foo {
+	public function bar() { return true }
+}
+class widget : foo {
+	public var baz = super.bar();
+	
+	public function Constructor() {
+	}
+}
+(class : widget {
+	public function Constructor(){ return super.super.bar() }
+})()
+</code>
+
+<!--
+#######################CONSTRUCTORS/DESTRUCTORS#######################
+-->
+<code>
+class foo {
+	public function Constructor(){}
+}
+</code>
+<code>
+class foo {
+	public function Destructor(){}
+}
+</code>
+<code class="eval">
+(class {
+	public function Constructor(){
+		return true;
+	}
+})()
+</code>
+<code class="eval">
+class foo{
+	private function Constructor(){
+		return true;
+	}
+	
+	static var bar = class {
+		public function Constructor() {
+			return new foo;
+		}
+	}
+}
+
+foo.bar
+</code>
+<code class="eval">
+(class {
+	private var foo = 1;
+	static function Constructor() {
+		foo = true;
+	}
+	public function Constructor(){
+		return foo;
+	}
+})()
+</code>
+<code>
+class foo {
+	public function Destructor(){}
+	public function Destructor(x){}
+}
+</code>
+
+<!--
+#######################METHOD OVERLOADING#######################
+-->
+<code class="eval">
+class foo {
+	static function bar() {
+		return [true];
+	}
+	static function bar(x) {
+		return [false];
+	}
+}
+
+[foo.bar(), foo.bar(1)]
+</code>
+<code class="eval">
+class foo {
+	public function Constructor() {
+		return [true];
+	}
+	public function Constructor(x) {
+		return [false];
+	}
+}
+
+[new foo, new foo(1)]
+</code>
+
+<!--
+#######################THIS KEYWORD#######################
+-->
+<code class="eval">
+class foo {
+	public var b = true;
+
+	public function fooMethod() {
+		return this.b;
+	}
+}
+
+class bar {
+	public function barMethod(method) {
+		return method();
+	}
+}
+
+var a = new foo();
+var b = new bar();
+b.barMethod(a.fooMethod);
+</code>
+<code class="eval">
+class foo {
+	public function() {
+		this.bar = true;
+	}
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	public function() {
+		this.bar = true;
+	}
+}
+
+foo.bar
+</code>
+<code class="eval">
+class foo {
+	private var bar = false;
+	public function() {
+		this.bar = true;
+	}
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	public var bar = false;
+	public function() {
+		this.bar = true;
+	}
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	protected var bar = false;
+	public function() {
+		this.bar = true;
+	}
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	private var bar = true;
+	public function() {
+		this.bar = bar;
+	}
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	public var bar = true;
+	public function() {
+		this.bar = bar;
+	}
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	protected var bar = true;
+	public function() {
+		this.bar = bar;
+	}
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	private var bar = true;
+	public function() {
+		this.bar = bar;
+	}
+	public var bar = 10;
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	public var bar = true;
+	public function() {
+		this.bar = bar;
+	}
+	public var bar = 10;
+}
+
+(new foo).bar
+</code>
+<code class="eval">
+class foo {
+	protected var bar = true;
+	public function() {
+		this.bar = bar;
+	}
+	public var bar = 10;
+}
+
+(new foo).bar
+</code>
+
+<!--
+#######################MISCELLANEOUS#######################
+-->
+<code>
+var foo = new class {};
+
+new foo;
+</code>
+<code class="eval">
+class foo {
+	private var bar = (function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	public var bar = (function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	protected var bar = (function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	static var bar = (function() {
+		return true
+	})();
+}
+
+foo.bar
+</code>
+<code class="eval">
+class foo {
+	private static var bar = (function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	public static var bar = (function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	protected static var bar = (function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	private var bar = (1, function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	public var bar = (1, function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	protected var bar = (1, function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	static var bar = (1, function() {
+		return true
+	})();
+}
+
+foo.bar
+</code>
+<code class="eval">
+class foo {
+	private static var bar = (1, function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	public static var bar = (1, function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	protected static var bar = (1, function() {
+		return true
+	})();
+	
+	public var baz = bar;
+}
+
+(new foo).baz
+</code>
+<code class="eval">
+class foo {
+	public function bar() {
+		return true;
+	}
+
+	public var baz = function() {
+		return bar();
+	};
+}
+
+(new foo).baz()
+</code>
+
+<button onclick="Start()">Start</button>
+
+<script type="text/javascript" src="../jsdefs.js"></script>
+<script type="text/javascript" src="../jsparse.js"></script>
+<script type="text/javascript" src="../compiler.js"></script>
+
+<script type="text/javascript" src="qunit.js"></script>
+<script type="text/javascript">
+var codeTags = document.getElementsByTagName("code"), code = [], c;
+
+for (var i=0, len=codeTags.length; i<len; i++) {
+	c = new compiler(window.narcissus.jsparse((codeTags[i].innerText||codeTags[i].textContent)), {nowrap:true});
+	c.preprocess();
+	try {
+		code.push(codeTags[i].className == "eval" ? eval(c.compile()) : c.compile());
+	}catch(e) {
+		code.push("Error");
+	}
+}
+
+while(code.length != codeTags.length); //Stop race conditions
+
+function Start() { //Problems with race conditions with qUnit, so wrap in function
+
+var i = 0;
+
+test("Basic Requirements", function() {	
+	ok(code[i++], "Class Declaration");
+	ok(code[i++], "Class Expression");
+	ok(code[i++], "Anonymous Classes");
+	ok(code[i++], "Nested Classes");
+	ok(code[i++], "Subclasses");
+	ok(code[i++], "Singletons");
+	ok(code[i++], "Anonymous Singletons");
+	equal(code[i++], true, "(class {...})() calls constructor");
+	ok(code[i++], "Variable Declarations - var");
+	ok(code[i++], "Function Declarations");
+	equal(code[i++], true, "Function declarations (resolves even if declaration comes later)");
+	
+	delete bar; //hack to deal with global scope
+});
+
+test("Static and Instance Members", function() {
+	ok(code[i++], "static Keyword");
+	equal(code[i++], true, "Static variables");
+	equal(code[i++], true, "Static methods");
+	
+	ok(code[i++], "Create class instance");
+	equal(code[i++], true, "Instance variables");
+	equal(code[i++], true, "Instance methods");
+	equal(code[i++], void 0, "Instance variables cannot be accessed without instance");
+	raises(Function(code[i++]), TypeError, "Instance methods cannot be accessed without instance");
+	equal(code[i++], true, "Instance pure method equality");
+});
+
+test("Access Modifiers", function() {
+	ok(code[i++], "public Keyword");
+	ok(code[i++], "private Keyword");
+	ok(code[i++], "protected Keyword");
+	
+	equal(code[i++], true, "Private variable can be accessed inside class");
+	raises(Function(code[i++]), ReferenceError, "Private variable cannot be accessed outside class");
+	raises(Function(code[i++]), ReferenceError, "Private variable cannot be accessed by subclass");
+	raises(Function(code[i++]), ReferenceError, "Private variable cannot be accessed by nested class");
+	
+	equal(code[i++], true, "Public variable can be accessed inside class");
+	raises(Function(code[i++]), ReferenceError, "Public variable cannot be accessed outside class");
+	equal(code[i++], true, "Public variable can be accessed inside subclass");
+	equal(code[i++], true, "Public variable can be accessed inside nested class");
+	
+	raises(Function(code[i++]), ReferenceError, "Protected variable cannot be accessed outside class");
+	equal(code[i++], true, "Protected variable can be accessed inside subclass");
+	equal(code[i++], true, "Protected variable can be accessed inside nested class");
+	
+	equal(code[i++], true, "Function declarations (resolves even if declaration comes later) - Public");
+	equal(code[i++], true, "Function declarations (resolves even if declaration comes later) - Protected");
+	equal(code[i++], true, "Function declarations (resolves even if declaration comes later) - Private");
+	
+	equal(code[i++], true, "Public variable of nested class resolves correctly inside nested class");
+	equal(code[i++], true, "Protected variable of nested class resolves correctly inside nested class");
+	equal(code[i++], true, "Private variable of nested class resolves correctly inside nested class");
+	
+	equal(code[i++], true, "Public function declaration of nested class resolves correctly inside nested class");
+	equal(code[i++], true, "Protected function declaration of nested class resolves correctly inside nested class");
+	equal(code[i++], true, "Private function declaration of nested class resolves correctly inside nested class");
+	
+	equal(code[i++], true, "Public function declaration of nested class resolves correctly inside nested class (resolves even if declaration comes later)");
+	equal(code[i++], true, "Protected function declaration of nested class resolves correctly inside nested class (resolves even if declaration comes later)");
+	equal(code[i++], true, "Private function declaration of nested class resolves correctly inside nested class (resolves even if declaration comes later)");
+});
+
+test("Super", function() {
+	expect(3);
+	
+	ok(code[i++], "super Keyword");
+	equal(code[i++], true, "Walk inheritance chain once and access properties");
+	equal(code[i++], true, "Walk inheritance chain twice and access properties");
+});
+
+test("Constructors / Destructors", function() {
+	ok(code[i++], "Constructor");
+	ok(code[i++], "Destructor");
+	
+	equal(code[i++], true, "Public Constructor");
+	equal(code[i++], true, "Private Constructor");
+	equal(code[i++], true, "Static Constructor");
+	
+	equal(code[i++], "Error", "Destructor overloading is an error");
+});
+
+test("Method Overloading", function() {
+	deepEqual(code[i++], [[true], [false]], "Method Overloading");
+	deepEqual(code[i++], [[true], [false]], "Constructor Overloading");
+});
+
+test("this Keyword", function() {
+	equal(code[i++], true, "this keyword");
+	equal(code[i++], true, "this keyword creates public instance variable");
+	equal(code[i++], void 0, "this keyword creates public instance variable which cannot be accessed without an instance");
+	equal(code[i++], true, "this keyword creates public instance variable which overrides private variable");
+	equal(code[i++], true, "this keyword creates public instance variable which overrides public variable");
+	equal(code[i++], true, "this keyword creates public instance variable which overrides protected variable");
+	equal(code[i++], true, "this keyword resolves identifiers correctly when overriding a private variable");
+	equal(code[i++], true, "this keyword resolves identifiers correctly when overriding a public variable");
+	equal(code[i++], true, "this keyword resolves identifiers correctly when overriding a protected variable");
+	equal(code[i++], true, "this keyword resolves identifiers correctly when overriding a private variable with redeclaration");
+	equal(code[i++], true, "this keyword resolves identifiers correctly when overriding a public variable with redeclaration");
+	equal(code[i++], true, "this keyword resolves identifiers correctly when overriding a protected variable with redeclaration");
+});
+
+test("Miscellaneous", function() {
+	raises(Function(code[i++]), TypeError, "Singleton cannot be instantiated");
+	equal(code[i++], true, "Self-executing function assigned to instance variable (private)");
+	equal(code[i++], true, "Self-executing function assigned to instance variable (public)");
+	equal(code[i++], true, "Self-executing function assigned to instance variable (protected)");
+	equal(code[i++], true, "Self-executing function assigned to static variable (static only)");
+	equal(code[i++], true, "Self-executing function assigned to static variable (private static)");
+	equal(code[i++], true, "Self-executing function assigned to static variable (public static)");
+	equal(code[i++], true, "Self-executing function assigned to static variable (protected static)");
+	equal(code[i++], true, "Self-executing function assigned to instance variable with comma operator (private)");
+	equal(code[i++], true, "Self-executing function assigned to instance variable with comma operator (public)");
+	equal(code[i++], true, "Self-executing function assigned to instance variable with comma operator (protected)");
+	equal(code[i++], true, "Self-executing function assigned to static variable with comma operator (static only)");
+	equal(code[i++], true, "Self-executing function assigned to static variable with comma operator (private static)");
+	equal(code[i++], true, "Self-executing function assigned to static variable with comma operator (public static)");
+	equal(code[i++], true, "Self-executing function assigned to static variable with comma operator (protected static)");
+	equal(code[i++], true, "Function expression can call function declaration inside class without this keyword");
+});
+
+}
+</script>
+</body>
+</html>

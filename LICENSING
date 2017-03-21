@@ -1,0 +1,23 @@
+"Code file" and "code files" in this document refers to electronic files 
+containing instructions for computer(s) or computer program(s).
+
+Each individual code file should contain a license block specifying permissions 
+and licenses.  In the absence of such a license block, refer to one of the 
+following files - if present - in the code file's containing directory:
+
+LICENSE
+LICENSE.TXT
+LICENSE.DOC
+LICENCE
+LICENCE.TXT
+LICENCE.DOC
+
+The above filenames are case-insensitive and are hereinafter referred to as the 
+"License File."  If more than one License File is present in a single directory, 
+the License File(s) are considered void.
+
+The License File applies the license to all code files in the same directory but 
+not to its subdirectories.
+
+In the absence of a license block within a code file and the absence of a 
+License File, all rights are effectively reserved by the copyright owner.

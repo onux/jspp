@@ -1,0 +1,77 @@
+Alpha 0.13
+--------
+* Fixed "this" keyword to refer to current instance of a class
+* Fixed class method declarations - behaves like JS function declarations now
+* Fixed access modifiers for nested classes
+* Fixed class instantation bug in IE8 when using Object.defineProperty
+* "protected" keyword and related tests are now working
+* "super" keyword and related tests are now working
+* Bug fixes
+
+10/25/11 - Alpha 0.12
+--------
+* Fully typed ES3
+* #typesys strict will look up properties
+* #typesys strict will look up the prototype chain
+* #typesys strict is compatible with typed ES3
+* Property assignments are saved by compiler
+* Started parsing nullable types, "is" keyword
+* Bug fixes to #typesys strict and classes
+
+10/10/11 - Alpha 0.11
+--------
+* Fixed parsing of rest parameters as first parameter
+* Redeclaration of function parameters with let now works properly
+* Static class members are now looked up properly
+* Fixed bug where class members were being looked up outside of class
+
+10/7/11
+-------
+* Added compiler.html - web page to invoke compiler
+* Fixed bugs with destructuring assignments and block scoping
+
+10/3/11
+-------
+* Parses and compiles all regular JavaScript tokens now
+* Added exponent operator
+* Added heredocs and multi-line strings
+
+10/2/11
+-------
+* #typesys strict handles functions and function calls
+* #typesys strict handles typed arrays (StringArray et al - NOT WebGL typed arrays)
+
+10/1/11
+-------
+* Added type inference to object declarations in #typesys strict
+	Example: var a as Object = {
+				 foo: "foo", //inferred as String
+				 bar: 1 //inferred as Number
+			 };
+	Easier to compose instead of declaring a type for each property.
+
+9/30/11
+-------
+* Created type system: #typesys strict (Strong, static typing)
+
+9/23/11
+-------
+* Added array comprehensions
+* Added array operators, e.g. [1, 2, 3] *= 5
+
+9/15/11
+-------
+* Added pluggable type systems
+* Added es5.js to standard library to allow for array extras et al
+
+9/1/11
+-------
+* Added classes.  Nested classes, subclasses, access modifiers (private, public, protected), polymorphism, super, constructors, destructors, instance members, static members, overloadable methods, singletons, anonymous classes, classes as first-class citizens
+* Added block scoping
+* Added implicit RegExp.prototype.exec as implemented in SpiderMonkey/v8.  Example: /foo/("foo")
+* Added custom regex delimiters
+* Added regex comments
+* Added regex free spacing mode with "x" flag (ignores whitespace, comments)
+* Added "inside" keyword.  Shortcut for Object.prototype.hasOwnProperty.call(foo, bar)
+* Added logical assignment operators &&= and ||=
+* Added function default parameters

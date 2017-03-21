@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>JavaScript++ Compiler</title>
+</head>
+<body>
+
+<p><b>Source Code:</b></p>
+<textarea id="code" style="width:100%;" rows="15"></textarea><br>
+
+<input type="checkbox" id="check_debug" checked="checked"> Compile debug data <input type="checkbox" id="check_warnings" checked="checked"> Show Warnings in Console <input type="checkbox"  id="check_wrap" checked="checked"> Wrap in Function<br><br>
+
+<button id="compile">Compile</button> <button id="execute">Execute</button> <span id="compile-time"></span>
+
+<p><b>Compiled Code:</b></p>
+<textarea id="compiled" style="width:100%;" rows="15"></textarea>
+
+<script type="text/javascript" src="lib/jspp/lang/es5.js"></script>
+<script type="text/javascript" src="src/jsdefs.js"></script>
+<script type="text/javascript" src="src/jsparse.js"></script>
+<script type="text/javascript" src="src/typed-es3.js"></script>
+<script type="text/javascript" src="src/compiler.js"></script>
+<script type="text/javascript" src="typesys/strict.js"></script>
+<script type="text/javascript">
+function compile() {
+	var $ = function(id) { return document.getElementById(id) };
+	
+	var t = +new Date, status = $("compile-time");
+	
+	try {
+		var c = new compiler(window.narcissus.jsparse($("code").value), {
+			//Compiler options here
+			debug: $("check_debug").checked,
+			nowrap: !$("check_wrap").checked,
+			warnings: $("check_warnings").checked
+		});
+		c.preprocess();
+		$("compiled").value = c.compile();
+		status.innerText = status.textContent = "Compiled in " + (+new Date - t) + "ms";
+	}catch(e) {
+		status.innerText = status.textContent = "Error: " + e;
+	}
+}
+document.getElementById("compile").onclick=compile;
+document.getElementById("execute").onclick=function() {
+	compile();
+	eval(document.getElementById("compiled").value);
+};
+</script>
+
+</body>
+</html>
