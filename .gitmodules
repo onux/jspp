@@ -1,3 +1,6 @@
 [submodule "Libraries/jsppUnit"]
 	path = Libraries/jsppUnit
 	url = https://github.com/onux/jsppUnit
+[submodule "Libraries/Altitude-MVC"]
+	path = Libraries/Altitude-MVC
+	url = https://github.com/onux/altitude
