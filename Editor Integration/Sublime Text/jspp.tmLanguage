@@ -6,6 +6,7 @@
 	<array>
 		<string>jspp</string>
 		<string>jpp</string>
+		<string>js++</string>
 	</array>
 	<key>foldingStartMarker</key>
 	<string>(\{\s*(//.*)?$|^\s*// \{\{\{)</string>

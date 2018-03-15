@@ -6,7 +6,7 @@
 	"contributes": {
 		"languages": [{
 			"id": "jspp",
-			"extensions": [ ".jspp", ".jpp" ],
+			"extensions": [ ".jspp", ".jpp", ".js++" ],
 			"aliases": [ "JS++", "js++" ],
 			"configuration": "./language-configuration.json"
 		}],

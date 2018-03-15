@@ -12,7 +12,7 @@ edits:
     Under `[Extensions]`, add the following line:
 
     ```
-    JS++=*.jspp;*.jpp;
+    JS++=*.jspp;*.jpp;*.js++;
     ```
 
     Under `[Groups]`, add `JS++` (separated by semicolons) to the `Programming=`
@@ -21,8 +21,8 @@ list.
 
 ## Troubleshooting
 
-If files ending in `.jspp` or `.jpp` are not automatically being highlighted as
-JS++ files, ensure the following is correct:
+If files ending in `.jspp`,`.jpp`, or `.js++` are not automatically being 
+highlighted as JS++ files, ensure the following is correct:
 
 `filetypes.<THIS>.conf`
 
@@ -31,6 +31,6 @@ exactly (including case) the text that appears in your
 `/usr/share/geany/filetype_extensions.conf` file.
 
 Therefore, if you named the file `filetypes.Js++.conf` and you added
-`JS++=*.jspp;*.jpp;` to `filetype_extensison.conf`, the filename and
+`JS++=*.jspp;*.jpp;*.js++;` to `filetype_extensison.conf`, the filename and
 configuration names do not match exactly, and Geany will fail to automatically
 load the JS++ plugin.

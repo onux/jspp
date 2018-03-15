@@ -15,7 +15,7 @@ Installation
 
     ```
     " JS++
-    au BufNewFile,BufRead *.jpp,*.jspp              setf jspp
+    au BufNewFile,BufRead *.jpp,*.jspp,*.js++              setf jspp
     ```
 5. In the vim plugin path, there should be a `syntax` folder. Copy the jspp.vim file into the `syntax` folder.
 

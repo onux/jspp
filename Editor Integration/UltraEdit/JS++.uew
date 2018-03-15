@@ -1,4 +1,4 @@
-/L7"JS++" CSHARP_LANG Line Comment = // Block Comment On = /* Block Comment Off = */ Escape Char = \  String Chars = "'`   File Extensions = JPP JSPP
+/L7"JS++" CSHARP_LANG Line Comment = // Block Comment On = /* Block Comment Off = */ Escape Char = \  String Chars = "'`   File Extensions = JPP JSPP JS++
 /Regexp Type = Perl
 /TGBegin "Functions"
 /TGFindStr = "^[ \t]*[a-z_\.0-9]+[ \t]+[a-z_\.0-9]+[ \t]+[a-z_\.0-9<>]+[ \t]+([0-9\\.a-z_ \t]*)\(+[^=;\n]+$"
