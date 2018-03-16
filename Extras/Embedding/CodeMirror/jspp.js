@@ -11,7 +11,7 @@ CodeMirror.defineSimpleMode('jspp', {
             token: 'keyword'},
         {regex: /(?:typeof|delete|switch|default|finally|continue|debugger|instanceof|export)\b/, token: 'keyword'},
         {regex: /(?:import|external|foreach|typeid|super|implicit|explicit)\b/, token: 'keyword'},
-        {regex: /(?:var|function|bool|string|byte|short|int|long|float|double|char|void|signed|unsigned)\b/,
+        {regex: /(?:var|function|bool|string|byte|short|int|long|float|double|char|void|signed|unsigned|auto)\b/,
             token: 'keyword'},
         {regex: /(?:private|protected|public|static|final|inline|property|abstract|optional|virtual|override)\b/,
             token: 'keyword'},

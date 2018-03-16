@@ -21,7 +21,7 @@ define('ace/mode/jspp_highlight_rules', function(require, exports, module) {
         {regex: /(?:typeof|delete|switch|default|finally|continue|debugger|instanceof|export)\b/, token: 'keyword'},
         {regex: /(?:import|new|const|typeid|super)\b/, token: 'keyword'},
         {regex: /(?:external|implicit|explicit)\b/, token: 'storage.modifier'},
-        {regex: /(?:var|function|bool|string|byte|short|int|long|float|double|char|void|signed|unsigned)\b/,
+        {regex: /(?:var|function|bool|string|byte|short|int|long|float|double|char|void|signed|unsigned|auto)\b/,
             token: 'storage.type'},
         {regex: /(?:private|protected|public|static|final|inline|property|abstract|optional|virtual|override)\b/,
             token: 'storage.modifier'},

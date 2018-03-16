@@ -20,7 +20,8 @@
 			
 			// JS++ Types
 			"bool", "string", "byte", "char", "double", "float", "int",
-			"long", "short", "unsigned", "signed", "void", "var", "function"
+			"long", "short", "unsigned", "signed", "void", "var", "function",
+			"auto"
 		].join("\x20");
 
 		this.regexList = [
